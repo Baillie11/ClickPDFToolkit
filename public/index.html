@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click PDF Toolkit</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>📄 Click PDF Toolkit</h1>
+            <p>Your all-in-one PDF solution</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Tool Selection Grid -->
+        <section id="tool-grid" class="tool-grid">
+            <!-- Merge & Organize -->
+            <div class="tool-category">
+                <h2>Merge & Organize</h2>
+                <div class="tools">
+                    <div class="tool-card" data-tool="merge">
+                        <div class="tool-icon">🔗</div>
+                        <h3>Merge PDFs</h3>
+                        <p>Combine multiple PDFs into one</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="split">
+                        <div class="tool-icon">✂️</div>
+                        <h3>Split PDF</h3>
+                        <p>Split PDF into separate pages</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="reorder">
+                        <div class="tool-icon">🔄</div>
+                        <h3>Reorder Pages</h3>
+                        <p>Rearrange PDF pages</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="rotate">
+                        <div class="tool-icon">↻</div>
+                        <h3>Rotate PDF</h3>
+                        <p>Rotate pages 90°, 180°, 270°</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Convert To PDF -->
+            <div class="tool-category">
+                <h2>Convert to PDF</h2>
+                <div class="tools">
+                    <div class="tool-card active" data-tool="image-to-pdf">
+                        <div class="tool-icon">🖼️</div>
+                        <h3>Image to PDF</h3>
+                        <p>Convert images to PDF</p>
+                        <span class="status available">Available</span>
+                    </div>
+                    <div class="tool-card" data-tool="word-to-pdf">
+                        <div class="tool-icon">📝</div>
+                        <h3>Word to PDF</h3>
+                        <p>Convert Word documents to PDF</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="ppt-to-pdf">
+                        <div class="tool-icon">📊</div>
+                        <h3>PowerPoint to PDF</h3>
+                        <p>Convert presentations to PDF</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="excel-to-pdf">
+                        <div class="tool-icon">📈</div>
+                        <h3>Excel to PDF</h3>
+                        <p>Convert spreadsheets to PDF</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="html-to-pdf">
+                        <div class="tool-icon">🌐</div>
+                        <h3>HTML to PDF</h3>
+                        <p>Convert web pages to PDF</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Convert From PDF -->
+            <div class="tool-category">
+                <h2>Convert from PDF</h2>
+                <div class="tools">
+                    <div class="tool-card" data-tool="pdf-to-image">
+                        <div class="tool-icon">🖼️</div>
+                        <h3>PDF to Image</h3>
+                        <p>Convert PDF pages to images</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="pdf-to-word">
+                        <div class="tool-icon">📝</div>
+                        <h3>PDF to Word</h3>
+                        <p>Convert PDF to Word document</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="pdf-to-ppt">
+                        <div class="tool-icon">📊</div>
+                        <h3>PDF to PowerPoint</h3>
+                        <p>Convert PDF to presentation</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="pdf-to-excel">
+                        <div class="tool-icon">📈</div>
+                        <h3>PDF to Excel</h3>
+                        <p>Convert PDF to spreadsheet</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit & Modify -->
+            <div class="tool-category">
+                <h2>Edit & Modify</h2>
+                <div class="tools">
+                    <div class="tool-card" data-tool="edit">
+                        <div class="tool-icon">✏️</div>
+                        <h3>Edit PDF</h3>
+                        <p>Add text, images, annotations</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="compress">
+                        <div class="tool-icon">📦</div>
+                        <h3>Compress PDF</h3>
+                        <p>Reduce PDF file size</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="watermark">
+                        <div class="tool-icon">💧</div>
+                        <h3>Watermark</h3>
+                        <p>Add text or image watermark</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="sign">
+                        <div class="tool-icon">✍️</div>
+                        <h3>Sign PDF</h3>
+                        <p>Add digital signature</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security & Text -->
+            <div class="tool-category">
+                <h2>Security & Text</h2>
+                <div class="tools">
+                    <div class="tool-card" data-tool="protect">
+                        <div class="tool-icon">🔒</div>
+                        <h3>Protect PDF</h3>
+                        <p>Add password protection</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="unlock">
+                        <div class="tool-icon">🔓</div>
+                        <h3>Unlock PDF</h3>
+                        <p>Remove password protection</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="ocr">
+                        <div class="tool-icon">👁️</div>
+                        <h3>OCR PDF</h3>
+                        <p>Extract text from scanned PDFs</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                    <div class="tool-card" data-tool="extract-text">
+                        <div class="tool-icon">📋</div>
+                        <h3>Extract Text</h3>
+                        <p>Extract text content from PDF</p>
+                        <span class="status coming-soon">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tool Workspace -->
+        <section id="workspace" class="workspace hidden">
+            <button class="back-btn" onclick="showToolGrid()">← Back to Tools</button>
+            
+            <!-- Image to PDF Tool -->
+            <div id="image-to-pdf-tool" class="tool-workspace">
+                <h2>🖼️ Image to PDF</h2>
+                <p>Convert your images to a PDF document. Drag and drop or select multiple images.</p>
+                
+                <form id="image-to-pdf-form">
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-icon">📁</div>
+                        <p>Drag & drop images here or <span class="browse-link">browse</span></p>
+                        <p class="file-types">Supports: JPG, PNG, GIF, BMP, WebP</p>
+                        <input type="file" id="image-input" name="images" multiple accept="image/*" hidden>
+                    </div>
+
+                    <div id="image-preview" class="image-preview"></div>
+
+                    <div class="options-panel">
+                        <h3>Output Settings</h3>
+                        <div class="filename-group">
+                            <label for="output-filename">File Name</label>
+                            <div class="filename-input-wrapper">
+                                <input type="text" id="output-filename" name="outputFilename" placeholder="Enter filename" value="my-document">
+                                <span class="file-extension">.pdf</span>
+                            </div>
+                        </div>
+                        <h3>Page Options</h3>
+                        <div class="options-grid">
+                            <div class="option-group">
+                                <label for="page-size">Page Size</label>
+                                <select id="page-size" name="pageSize">
+                                    <option value="A4">A4</option>
+                                    <option value="Letter">Letter</option>
+                                    <option value="Legal">Legal</option>
+                                    <option value="A3">A3</option>
+                                    <option value="A5">A5</option>
+                                </select>
+                            </div>
+                            <div class="option-group">
+                                <label for="orientation">Orientation</label>
+                                <select id="orientation" name="orientation">
+                                    <option value="portrait">Portrait</option>
+                                    <option value="landscape">Landscape</option>
+                                </select>
+                            </div>
+                            <div class="option-group">
+                                <label for="margin">Margin (px)</label>
+                                <input type="number" id="margin" name="margin" value="20" min="0" max="100">
+                            </div>
+                            <div class="option-group">
+                                <label for="fit-mode">Image Fit</label>
+                                <select id="fit-mode" name="fitMode">
+                                    <option value="fit">Fit (maintain aspect ratio)</option>
+                                    <option value="fill">Fill (may crop)</option>
+                                    <option value="stretch">Stretch (distort)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="convert-btn" id="convert-btn" disabled>
+                        <span class="btn-text">Convert to PDF</span>
+                        <span class="btn-loading hidden">Converting...</span>
+                    </button>
+                </form>
+
+                <div id="result" class="result hidden">
+                    <div class="success-icon">✅</div>
+                    <h3>Conversion Complete!</h3>
+                    <p id="result-message"></p>
+                    <a id="download-link" class="download-btn" href="#" download>Download PDF</a>
+                </div>
+            </div>
+
+            <!-- Placeholder for other tools -->
+            <div id="coming-soon-tool" class="tool-workspace hidden">
+                <h2 id="coming-soon-title">Tool Name</h2>
+                <div class="coming-soon-message">
+                    <div class="coming-soon-icon">🚧</div>
+                    <h3>Coming Soon!</h3>
+                    <p>This feature is currently under development. Check back soon!</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p class="app-name">📄 Click PDF Toolkit</p>
+            <p class="copyright">&copy; 2024 Click PDF Toolkit. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
