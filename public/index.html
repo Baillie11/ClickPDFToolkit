@@ -120,11 +120,11 @@
             <div class="tool-category">
                 <h2>Edit & Modify</h2>
                 <div class="tools">
-                    <div class="tool-card" data-tool="edit">
+                    <div class="tool-card active" data-tool="edit">
                         <div class="tool-icon">✏️</div>
                         <h3>Edit PDF</h3>
                         <p>Add text, images, annotations</p>
-                        <span class="status coming-soon">Coming Soon</span>
+                        <span class="status available">Available</span>
                     </div>
                     <div class="tool-card" data-tool="compress">
                         <div class="tool-icon">📦</div>
@@ -138,11 +138,11 @@
                         <p>Add text or image watermark</p>
                         <span class="status coming-soon">Coming Soon</span>
                     </div>
-                    <div class="tool-card" data-tool="sign">
+                    <div class="tool-card active" data-tool="sign">
                         <div class="tool-icon">✍️</div>
                         <h3>Sign PDF</h3>
                         <p>Add digital signature</p>
-                        <span class="status coming-soon">Coming Soon</span>
+                        <span class="status available">Available</span>
                     </div>
                 </div>
             </div>
@@ -252,6 +252,197 @@
                     <h3>Conversion Complete!</h3>
                     <p id="result-message"></p>
                     <a id="download-link" class="download-btn" href="#" download>Download PDF</a>
+                </div>
+            </div>
+
+            <!-- Edit PDF Tool -->
+            <div id="edit-tool" class="tool-workspace hidden">
+                <h2>✏️ Edit PDF</h2>
+                <p>Add text and images to your PDF document.</p>
+                
+                <form id="edit-pdf-form">
+                    <div class="upload-area" id="edit-upload-area">
+                        <div class="upload-icon">📄</div>
+                        <p>Drag & drop PDF here or <span class="browse-link">browse</span></p>
+                        <p class="file-types">Supports: PDF files</p>
+                        <input type="file" id="edit-pdf-input" name="pdf" accept=".pdf" hidden>
+                    </div>
+                    
+                    <div id="edit-pdf-info" class="file-info hidden">
+                        <span class="file-icon">📄</span>
+                        <span id="edit-pdf-name" class="file-name-display"></span>
+                        <button type="button" class="remove-file-btn" onclick="removeEditPdf()">×</button>
+                    </div>
+
+                    <div class="options-panel">
+                        <h3>Output Settings</h3>
+                        <div class="filename-group">
+                            <label for="edit-output-filename">File Name</label>
+                            <div class="filename-input-wrapper">
+                                <input type="text" id="edit-output-filename" name="outputFilename" placeholder="Enter filename" value="edited-document">
+                                <span class="file-extension">.pdf</span>
+                            </div>
+                        </div>
+                        
+                        <h3>Add Text</h3>
+                        <div class="options-grid">
+                            <div class="option-group full-width">
+                                <label for="edit-text">Text to Add</label>
+                                <input type="text" id="edit-text" name="text" placeholder="Enter text to add to PDF">
+                            </div>
+                            <div class="option-group">
+                                <label for="edit-font-size">Font Size</label>
+                                <input type="number" id="edit-font-size" name="fontSize" value="16" min="8" max="72">
+                            </div>
+                            <div class="option-group">
+                                <label for="edit-text-color">Text Color</label>
+                                <input type="color" id="edit-text-color" name="textColor" value="#000000">
+                            </div>
+                            <div class="option-group">
+                                <label for="edit-text-x">Position X (%)</label>
+                                <input type="range" id="edit-text-x" name="textX" value="10" min="0" max="100">
+                                <span class="range-value" id="edit-text-x-value">10%</span>
+                            </div>
+                            <div class="option-group">
+                                <label for="edit-text-y">Position Y (%)</label>
+                                <input type="range" id="edit-text-y" name="textY" value="10" min="0" max="100">
+                                <span class="range-value" id="edit-text-y-value">10%</span>
+                            </div>
+                        </div>
+                        
+                        <h3>Add Image (Optional)</h3>
+                        <div class="options-grid">
+                            <div class="option-group full-width">
+                                <label>Overlay Image</label>
+                                <div class="image-upload-btn">
+                                    <input type="file" id="edit-overlay-image" name="overlayImage" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="option-group">
+                                <label for="edit-image-x">Image X (%)</label>
+                                <input type="range" id="edit-image-x" name="imageX" value="50" min="0" max="100">
+                                <span class="range-value" id="edit-image-x-value">50%</span>
+                            </div>
+                            <div class="option-group">
+                                <label for="edit-image-y">Image Y (%)</label>
+                                <input type="range" id="edit-image-y" name="imageY" value="50" min="0" max="100">
+                                <span class="range-value" id="edit-image-y-value">50%</span>
+                            </div>
+                            <div class="option-group">
+                                <label for="edit-image-scale">Image Scale (%)</label>
+                                <input type="range" id="edit-image-scale" name="imageScale" value="100" min="10" max="200">
+                                <span class="range-value" id="edit-image-scale-value">100%</span>
+                            </div>
+                        </div>
+                        
+                        <h3>Page Settings</h3>
+                        <div class="options-grid">
+                            <div class="option-group">
+                                <label for="edit-page-number">Page Number</label>
+                                <input type="number" id="edit-page-number" name="pageNumber" value="1" min="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="convert-btn" id="edit-btn" disabled>
+                        <span class="btn-text">Apply Changes</span>
+                        <span class="btn-loading hidden">Processing...</span>
+                    </button>
+                </form>
+
+                <div id="edit-result" class="result hidden">
+                    <div class="success-icon">✅</div>
+                    <h3>PDF Edited Successfully!</h3>
+                    <p id="edit-result-message"></p>
+                    <a id="edit-download-link" class="download-btn" href="#" download>Download PDF</a>
+                </div>
+            </div>
+
+            <!-- Sign PDF Tool -->
+            <div id="sign-tool" class="tool-workspace hidden">
+                <h2>✍️ Sign PDF</h2>
+                <p>Add your signature to a PDF document. Draw your signature or upload an image.</p>
+                
+                <form id="sign-pdf-form">
+                    <div class="upload-area" id="sign-upload-area">
+                        <div class="upload-icon">📄</div>
+                        <p>Drag & drop PDF here or <span class="browse-link">browse</span></p>
+                        <p class="file-types">Supports: PDF files</p>
+                        <input type="file" id="sign-pdf-input" name="pdf" accept=".pdf" hidden>
+                    </div>
+                    
+                    <div id="sign-pdf-info" class="file-info hidden">
+                        <span class="file-icon">📄</span>
+                        <span id="sign-pdf-name" class="file-name-display"></span>
+                        <button type="button" class="remove-file-btn" onclick="removeSignPdf()">×</button>
+                    </div>
+
+                    <div class="options-panel">
+                        <h3>Output Settings</h3>
+                        <div class="filename-group">
+                            <label for="sign-output-filename">File Name</label>
+                            <div class="filename-input-wrapper">
+                                <input type="text" id="sign-output-filename" name="outputFilename" placeholder="Enter filename" value="signed-document">
+                                <span class="file-extension">.pdf</span>
+                            </div>
+                        </div>
+                        
+                        <h3>Your Signature</h3>
+                        <div class="signature-tabs">
+                            <button type="button" class="sig-tab active" data-tab="draw">Draw</button>
+                            <button type="button" class="sig-tab" data-tab="upload">Upload Image</button>
+                        </div>
+                        
+                        <div id="draw-signature-panel" class="signature-panel">
+                            <div class="signature-pad-container">
+                                <canvas id="signature-pad" width="400" height="150"></canvas>
+                            </div>
+                            <button type="button" class="clear-signature-btn" onclick="clearSignature()">Clear Signature</button>
+                        </div>
+                        
+                        <div id="upload-signature-panel" class="signature-panel hidden">
+                            <div class="option-group">
+                                <label>Upload Signature Image</label>
+                                <input type="file" id="sign-signature-image" name="signatureImage" accept="image/*">
+                            </div>
+                            <p class="hint">For best results, use a PNG image with transparent background</p>
+                        </div>
+                        
+                        <h3>Signature Position</h3>
+                        <div class="options-grid">
+                            <div class="option-group">
+                                <label for="sign-x">Position X (%)</label>
+                                <input type="range" id="sign-x" name="signatureX" value="70" min="0" max="100">
+                                <span class="range-value" id="sign-x-value">70%</span>
+                            </div>
+                            <div class="option-group">
+                                <label for="sign-y">Position Y (%)</label>
+                                <input type="range" id="sign-y" name="signatureY" value="85" min="0" max="100">
+                                <span class="range-value" id="sign-y-value">85%</span>
+                            </div>
+                            <div class="option-group">
+                                <label for="sign-scale">Signature Size (%)</label>
+                                <input type="range" id="sign-scale" name="signatureScale" value="100" min="25" max="200">
+                                <span class="range-value" id="sign-scale-value">100%</span>
+                            </div>
+                            <div class="option-group">
+                                <label for="sign-page-number">Page Number</label>
+                                <input type="number" id="sign-page-number" name="pageNumber" value="1" min="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="convert-btn" id="sign-btn" disabled>
+                        <span class="btn-text">Sign PDF</span>
+                        <span class="btn-loading hidden">Signing...</span>
+                    </button>
+                </form>
+
+                <div id="sign-result" class="result hidden">
+                    <div class="success-icon">✅</div>
+                    <h3>PDF Signed Successfully!</h3>
+                    <p id="sign-result-message"></p>
+                    <a id="sign-download-link" class="download-btn" href="#" download>Download Signed PDF</a>
                 </div>
             </div>
 

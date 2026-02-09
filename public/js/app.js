@@ -3,6 +3,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     initToolCards();
     initImageToPdf();
+    initEditPdf();
+    initSignPdf();
+    initRangeSliders();
 });
 
 // Tool card click handlers
@@ -22,7 +25,15 @@ function showTool(tool) {
     const toolGrid = document.getElementById('tool-grid');
     const workspace = document.getElementById('workspace');
     const imageToPdfTool = document.getElementById('image-to-pdf-tool');
+    const editTool = document.getElementById('edit-tool');
+    const signTool = document.getElementById('sign-tool');
     const comingSoonTool = document.getElementById('coming-soon-tool');
+    
+    // Hide all tools first
+    imageToPdfTool.classList.add('hidden');
+    editTool.classList.add('hidden');
+    signTool.classList.add('hidden');
+    comingSoonTool.classList.add('hidden');
     
     // Hide tool grid, show workspace
     toolGrid.classList.add('hidden');
@@ -31,9 +42,12 @@ function showTool(tool) {
     // Show appropriate tool
     if (tool === 'image-to-pdf') {
         imageToPdfTool.classList.remove('hidden');
-        comingSoonTool.classList.add('hidden');
+    } else if (tool === 'edit') {
+        editTool.classList.remove('hidden');
+    } else if (tool === 'sign') {
+        signTool.classList.remove('hidden');
+        initSignatureCanvas();
     } else {
-        imageToPdfTool.classList.add('hidden');
         comingSoonTool.classList.remove('hidden');
         
         // Update coming soon title
@@ -50,10 +64,8 @@ function showTool(tool) {
             'pdf-to-word': '📝 PDF to Word',
             'pdf-to-ppt': '📊 PDF to PowerPoint',
             'pdf-to-excel': '📈 PDF to Excel',
-            'edit': '✏️ Edit PDF',
             'compress': '📦 Compress PDF',
             'watermark': '💧 Watermark',
-            'sign': '✍️ Sign PDF',
             'protect': '🔒 Protect PDF',
             'unlock': '🔓 Unlock PDF',
             'ocr': '👁️ OCR PDF',
@@ -72,8 +84,22 @@ function showToolGrid() {
     toolGrid.classList.remove('hidden');
     workspace.classList.add('hidden');
     
-    // Reset form
+    // Reset all forms
     resetImageToPdfForm();
+    resetEditPdfForm();
+    resetSignPdfForm();
+}
+
+// Initialize range sliders to show values
+function initRangeSliders() {
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+        const valueSpan = document.getElementById(slider.id + '-value');
+        if (valueSpan) {
+            slider.addEventListener('input', () => {
+                valueSpan.textContent = slider.value + '%';
+            });
+        }
+    });
 }
 
 // Image to PDF functionality
@@ -239,5 +265,403 @@ function resetImageToPdfForm() {
     if (existingError) existingError.remove();
 }
 
-// Make showToolGrid globally accessible
+// ==================== EDIT PDF ====================
+let editPdfFile = null;
+
+function initEditPdf() {
+    const uploadArea = document.getElementById('edit-upload-area');
+    const fileInput = document.getElementById('edit-pdf-input');
+    const form = document.getElementById('edit-pdf-form');
+    
+    // Click to browse
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            editPdfFile = e.target.files[0];
+            showEditPdfInfo();
+        }
+    });
+    
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+            editPdfFile = files[0];
+            showEditPdfInfo();
+        }
+    });
+    
+    // Form submit
+    form.addEventListener('submit', handleEditPdfSubmit);
+}
+
+function showEditPdfInfo() {
+    const uploadArea = document.getElementById('edit-upload-area');
+    const fileInfo = document.getElementById('edit-pdf-info');
+    const fileName = document.getElementById('edit-pdf-name');
+    const btn = document.getElementById('edit-btn');
+    
+    uploadArea.classList.add('hidden');
+    fileInfo.classList.remove('hidden');
+    fileName.textContent = editPdfFile.name;
+    btn.disabled = false;
+}
+
+function removeEditPdf() {
+    editPdfFile = null;
+    const uploadArea = document.getElementById('edit-upload-area');
+    const fileInfo = document.getElementById('edit-pdf-info');
+    const btn = document.getElementById('edit-btn');
+    
+    uploadArea.classList.remove('hidden');
+    fileInfo.classList.add('hidden');
+    btn.disabled = true;
+    document.getElementById('edit-pdf-input').value = '';
+}
+
+async function handleEditPdfSubmit(e) {
+    e.preventDefault();
+    
+    if (!editPdfFile) return;
+    
+    const btn = document.getElementById('edit-btn');
+    const btnText = btn.querySelector('.btn-text');
+    const btnLoading = btn.querySelector('.btn-loading');
+    const result = document.getElementById('edit-result');
+    
+    btn.disabled = true;
+    btnText.classList.add('hidden');
+    btnLoading.classList.remove('hidden');
+    result.classList.add('hidden');
+    
+    try {
+        const formData = new FormData();
+        formData.append('pdf', editPdfFile);
+        formData.append('outputFilename', document.getElementById('edit-output-filename').value || 'edited-document');
+        formData.append('text', document.getElementById('edit-text').value);
+        formData.append('fontSize', document.getElementById('edit-font-size').value);
+        formData.append('textColor', document.getElementById('edit-text-color').value);
+        formData.append('textX', document.getElementById('edit-text-x').value);
+        formData.append('textY', document.getElementById('edit-text-y').value);
+        formData.append('pageNumber', document.getElementById('edit-page-number').value);
+        
+        // Add overlay image if selected
+        const overlayImage = document.getElementById('edit-overlay-image').files[0];
+        if (overlayImage) {
+            formData.append('overlayImage', overlayImage);
+            formData.append('imageX', document.getElementById('edit-image-x').value);
+            formData.append('imageY', document.getElementById('edit-image-y').value);
+            formData.append('imageScale', document.getElementById('edit-image-scale').value);
+        }
+        
+        const response = await fetch('/api/edit', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('edit-result-message').textContent = data.message;
+            document.getElementById('edit-download-link').href = data.downloadUrl;
+            result.classList.remove('hidden');
+        } else {
+            alert(data.error || 'Edit failed');
+        }
+    } catch (error) {
+        alert('An error occurred: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btnText.classList.remove('hidden');
+        btnLoading.classList.add('hidden');
+    }
+}
+
+function resetEditPdfForm() {
+    editPdfFile = null;
+    document.getElementById('edit-upload-area').classList.remove('hidden');
+    document.getElementById('edit-pdf-info').classList.add('hidden');
+    document.getElementById('edit-result').classList.add('hidden');
+    document.getElementById('edit-pdf-input').value = '';
+    document.getElementById('edit-output-filename').value = 'edited-document';
+    document.getElementById('edit-text').value = '';
+    document.getElementById('edit-btn').disabled = true;
+}
+
+// ==================== SIGN PDF ====================
+let signPdfFile = null;
+let signatureCanvas = null;
+let signatureCtx = null;
+let isDrawing = false;
+let hasSignature = false;
+
+function initSignPdf() {
+    const uploadArea = document.getElementById('sign-upload-area');
+    const fileInput = document.getElementById('sign-pdf-input');
+    const form = document.getElementById('sign-pdf-form');
+    
+    // Click to browse
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            signPdfFile = e.target.files[0];
+            showSignPdfInfo();
+        }
+    });
+    
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+            signPdfFile = files[0];
+            showSignPdfInfo();
+        }
+    });
+    
+    // Signature tabs
+    document.querySelectorAll('.sig-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.sig-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            const tabName = tab.dataset.tab;
+            document.getElementById('draw-signature-panel').classList.toggle('hidden', tabName !== 'draw');
+            document.getElementById('upload-signature-panel').classList.toggle('hidden', tabName !== 'upload');
+        });
+    });
+    
+    // Form submit
+    form.addEventListener('submit', handleSignPdfSubmit);
+}
+
+function initSignatureCanvas() {
+    signatureCanvas = document.getElementById('signature-pad');
+    if (!signatureCanvas) return;
+    
+    signatureCtx = signatureCanvas.getContext('2d');
+    
+    // Set canvas size
+    const container = signatureCanvas.parentElement;
+    signatureCanvas.width = container.offsetWidth - 4;
+    signatureCanvas.height = 150;
+    
+    // Clear canvas
+    signatureCtx.fillStyle = 'white';
+    signatureCtx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+    
+    // Drawing events
+    signatureCanvas.addEventListener('mousedown', startDrawing);
+    signatureCanvas.addEventListener('mousemove', draw);
+    signatureCanvas.addEventListener('mouseup', stopDrawing);
+    signatureCanvas.addEventListener('mouseout', stopDrawing);
+    
+    // Touch events
+    signatureCanvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousedown', {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        signatureCanvas.dispatchEvent(mouseEvent);
+    });
+    
+    signatureCanvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousemove', {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        signatureCanvas.dispatchEvent(mouseEvent);
+    });
+    
+    signatureCanvas.addEventListener('touchend', () => {
+        const mouseEvent = new MouseEvent('mouseup', {});
+        signatureCanvas.dispatchEvent(mouseEvent);
+    });
+}
+
+function startDrawing(e) {
+    isDrawing = true;
+    signatureCtx.beginPath();
+    signatureCtx.moveTo(
+        e.clientX - signatureCanvas.getBoundingClientRect().left,
+        e.clientY - signatureCanvas.getBoundingClientRect().top
+    );
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+    
+    signatureCtx.lineWidth = 2;
+    signatureCtx.lineCap = 'round';
+    signatureCtx.strokeStyle = '#000';
+    
+    signatureCtx.lineTo(
+        e.clientX - signatureCanvas.getBoundingClientRect().left,
+        e.clientY - signatureCanvas.getBoundingClientRect().top
+    );
+    signatureCtx.stroke();
+    hasSignature = true;
+    updateSignButton();
+}
+
+function stopDrawing() {
+    isDrawing = false;
+}
+
+function clearSignature() {
+    if (signatureCtx) {
+        signatureCtx.fillStyle = 'white';
+        signatureCtx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+        hasSignature = false;
+        updateSignButton();
+    }
+}
+
+function showSignPdfInfo() {
+    const uploadArea = document.getElementById('sign-upload-area');
+    const fileInfo = document.getElementById('sign-pdf-info');
+    const fileName = document.getElementById('sign-pdf-name');
+    
+    uploadArea.classList.add('hidden');
+    fileInfo.classList.remove('hidden');
+    fileName.textContent = signPdfFile.name;
+    updateSignButton();
+}
+
+function removeSignPdf() {
+    signPdfFile = null;
+    const uploadArea = document.getElementById('sign-upload-area');
+    const fileInfo = document.getElementById('sign-pdf-info');
+    
+    uploadArea.classList.remove('hidden');
+    fileInfo.classList.add('hidden');
+    document.getElementById('sign-pdf-input').value = '';
+    updateSignButton();
+}
+
+function updateSignButton() {
+    const btn = document.getElementById('sign-btn');
+    const uploadedSig = document.getElementById('sign-signature-image').files.length > 0;
+    btn.disabled = !signPdfFile || (!hasSignature && !uploadedSig);
+}
+
+async function handleSignPdfSubmit(e) {
+    e.preventDefault();
+    
+    if (!signPdfFile) return;
+    
+    const btn = document.getElementById('sign-btn');
+    const btnText = btn.querySelector('.btn-text');
+    const btnLoading = btn.querySelector('.btn-loading');
+    const result = document.getElementById('sign-result');
+    
+    btn.disabled = true;
+    btnText.classList.add('hidden');
+    btnLoading.classList.remove('hidden');
+    result.classList.add('hidden');
+    
+    try {
+        const formData = new FormData();
+        formData.append('pdf', signPdfFile);
+        formData.append('outputFilename', document.getElementById('sign-output-filename').value || 'signed-document');
+        formData.append('signatureX', document.getElementById('sign-x').value);
+        formData.append('signatureY', document.getElementById('sign-y').value);
+        formData.append('signatureScale', document.getElementById('sign-scale').value);
+        formData.append('pageNumber', document.getElementById('sign-page-number').value);
+        
+        // Check which signature method is active
+        const drawTabActive = document.querySelector('.sig-tab[data-tab="draw"]').classList.contains('active');
+        
+        if (drawTabActive && hasSignature) {
+            // Get signature from canvas as data URL
+            const signatureData = signatureCanvas.toDataURL('image/png');
+            formData.append('signatureData', signatureData);
+        } else {
+            // Use uploaded signature image
+            const sigImage = document.getElementById('sign-signature-image').files[0];
+            if (sigImage) {
+                formData.append('signatureImage', sigImage);
+            }
+        }
+        
+        const response = await fetch('/api/sign', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('sign-result-message').textContent = data.message;
+            document.getElementById('sign-download-link').href = data.downloadUrl;
+            result.classList.remove('hidden');
+        } else {
+            alert(data.error || 'Signing failed');
+        }
+    } catch (error) {
+        alert('An error occurred: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btnText.classList.remove('hidden');
+        btnLoading.classList.add('hidden');
+    }
+}
+
+function resetSignPdfForm() {
+    signPdfFile = null;
+    hasSignature = false;
+    document.getElementById('sign-upload-area').classList.remove('hidden');
+    document.getElementById('sign-pdf-info').classList.add('hidden');
+    document.getElementById('sign-result').classList.add('hidden');
+    document.getElementById('sign-pdf-input').value = '';
+    document.getElementById('sign-output-filename').value = 'signed-document';
+    document.getElementById('sign-signature-image').value = '';
+    document.getElementById('sign-btn').disabled = true;
+    if (signatureCtx) {
+        clearSignature();
+    }
+}
+
+// Make functions globally accessible
 window.showToolGrid = showToolGrid;
+window.removeFile = removeFile;
+window.removeEditPdf = removeEditPdf;
+window.removeSignPdf = removeSignPdf;
+window.clearSignature = clearSignature;
+
+// Listen for signature image upload
+document.addEventListener('DOMContentLoaded', () => {
+    const sigImageInput = document.getElementById('sign-signature-image');
+    if (sigImageInput) {
+        sigImageInput.addEventListener('change', updateSignButton);
+    }
+});

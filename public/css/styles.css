@@ -488,6 +488,165 @@ main {
     transform: translateY(-2px);
 }
 
+/* File Info Display */
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--gray-100);
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+.file-icon {
+    font-size: 1.5rem;
+}
+
+.file-name-display {
+    flex: 1;
+    font-weight: 500;
+    color: var(--gray-700);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.remove-file-btn {
+    width: 28px;
+    height: 28px;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.remove-file-btn:hover {
+    background: #dc2626;
+}
+
+/* Full Width Option */
+.option-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Range Slider Styles */
+input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--gray-200);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--primary-hover);
+}
+
+.range-value {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
+/* Color Input */
+input[type="color"] {
+    width: 100%;
+    height: 40px;
+    padding: 2px;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Signature Tabs */
+.signature-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.sig-tab {
+    flex: 1;
+    padding: 12px 20px;
+    background: var(--gray-100);
+    border: 2px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sig-tab:hover {
+    background: var(--gray-200);
+}
+
+.sig-tab.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Signature Pad */
+.signature-panel {
+    margin-bottom: 16px;
+}
+
+.signature-pad-container {
+    background: white;
+    border: 2px solid var(--gray-300);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+#signature-pad {
+    width: 100%;
+    height: 150px;
+    display: block;
+    cursor: crosshair;
+}
+
+.clear-signature-btn {
+    padding: 8px 16px;
+    background: var(--gray-200);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.clear-signature-btn:hover {
+    background: var(--gray-300);
+}
+
+/* Hint Text */
+.hint {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+    margin-top: 8px;
+}
+
 /* Coming Soon Message */
 .coming-soon-message {
     text-align: center;
