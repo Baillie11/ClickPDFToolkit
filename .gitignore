@@ -9,6 +9,12 @@ output/
 
 # Environment variables
 .env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+.npmrc
 
 # OS files
 .DS_Store
@@ -21,3 +27,12 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Generated development artifacts
+coverage/
+.nyc_output/
+dist/
+build/
+.cache/
+*.tmp
+*.tsbuildinfo

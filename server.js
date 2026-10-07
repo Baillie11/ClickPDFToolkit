@@ -1,115 +1,70 @@
 const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
+const fs = require('node:fs');
+const path = require('node:path');
+const { createSecurity } = require('./lib/security');
 
-// Import route handlers
-const mergeRoutes = require('./routes/merge');
-const splitRoutes = require('./routes/split');
-const compressRoutes = require('./routes/compress');
-const pdfToWordRoutes = require('./routes/pdfToWord');
-const wordToPdfRoutes = require('./routes/wordToPdf');
-const pdfToPptRoutes = require('./routes/pdfToPpt');
-const pptToPdfRoutes = require('./routes/pptToPdf');
-const pdfToExcelRoutes = require('./routes/pdfToExcel');
-const excelToPdfRoutes = require('./routes/excelToPdf');
-const editRoutes = require('./routes/edit');
-const pdfToImageRoutes = require('./routes/pdfToImage');
-const imageToPdfRoutes = require('./routes/imageToPdf');
-const signRoutes = require('./routes/sign');
-const watermarkRoutes = require('./routes/watermark');
-const rotateRoutes = require('./routes/rotate');
-const htmlToPdfRoutes = require('./routes/htmlToPdf');
-const unlockRoutes = require('./routes/unlock');
-const protectRoutes = require('./routes/protect');
-const ocrRoutes = require('./routes/ocr');
-const extractTextRoutes = require('./routes/extractText');
-const reorderRoutes = require('./routes/reorder');
+const placeholders = ['merge', 'split', 'compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'rotate', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text', 'reorder'];
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Ensure upload and output directories exist
-const uploadDir = path.join(__dirname, 'uploads');
-const outputDir = path.join(__dirname, 'output');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueName = `${uuidv4()}-${file.originalname}`;
-        cb(null, uniqueName);
+function createApp(options = {}) {
+    const app = express();
+    app.disable('x-powered-by');
+    const root = options.storageRoot || __dirname;
+    for (const [setting, folder] of [['uploadDir', 'uploads'], ['outputDir', 'output']]) {
+        const dir = path.join(root, folder);
+        fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+        app.set(setting, dir);
     }
-});
-
-const upload = multer({ 
-    storage,
-    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
-});
-
-// Make upload middleware available to routes
-app.set('upload', upload);
-app.set('uploadDir', uploadDir);
-app.set('outputDir', outputDir);
-
-// Routes
-app.use('/api/merge', mergeRoutes);
-app.use('/api/split', splitRoutes);
-app.use('/api/compress', compressRoutes);
-app.use('/api/pdf-to-word', pdfToWordRoutes);
-app.use('/api/word-to-pdf', wordToPdfRoutes);
-app.use('/api/pdf-to-ppt', pdfToPptRoutes);
-app.use('/api/ppt-to-pdf', pptToPdfRoutes);
-app.use('/api/pdf-to-excel', pdfToExcelRoutes);
-app.use('/api/excel-to-pdf', excelToPdfRoutes);
-app.use('/api/edit', editRoutes);
-app.use('/api/pdf-to-image', pdfToImageRoutes);
-app.use('/api/image-to-pdf', imageToPdfRoutes);
-app.use('/api/sign', signRoutes);
-app.use('/api/watermark', watermarkRoutes);
-app.use('/api/rotate', rotateRoutes);
-app.use('/api/html-to-pdf', htmlToPdfRoutes);
-app.use('/api/unlock', unlockRoutes);
-app.use('/api/protect', protectRoutes);
-app.use('/api/ocr', ocrRoutes);
-app.use('/api/extract-text', extractTextRoutes);
-app.use('/api/reorder', reorderRoutes);
-
-// Serve output files for download
-app.use('/download', express.static(outputDir));
-
-// Cleanup old files periodically (every hour)
-setInterval(() => {
-    const now = Date.now();
-    const maxAge = 60 * 60 * 1000; // 1 hour
-
-    [uploadDir, outputDir].forEach(dir => {
-        fs.readdir(dir, (err, files) => {
-            if (err) return;
-            files.forEach(file => {
-                const filePath = path.join(dir, file);
-                fs.stat(filePath, (err, stats) => {
-                    if (err) return;
-                    if (now - stats.mtimeMs > maxAge) {
-                        fs.unlink(filePath, () => {});
-                    }
-                });
-            });
-        });
+    const allowedHosts = new Set(options.allowedHosts || (process.env.ALLOWED_HOSTS || 'localhost,127.0.0.1,[::1]').split(',').map(host => host.trim().toLowerCase()));
+    const configuredOrigin = options.publicOrigin || process.env.PUBLIC_ORIGIN;
+    let publicOrigin;
+    if (configuredOrigin) {
+        const parsed = new URL(configuredOrigin);
+        if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.pathname !== '/' || parsed.search || parsed.hash) throw new Error('PUBLIC_ORIGIN must be an HTTP(S) origin without a path');
+        publicOrigin = parsed.origin;
+    }
+    app.set('secureCookies', publicOrigin?.startsWith('https://') || false);
+    app.use((req, res, next) => {
+        res.set({ 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store', 'Cross-Origin-Resource-Policy': 'same-origin', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'" });
+        if (!allowedHosts.has(req.hostname.toLowerCase())) return res.status(403).json({ error: 'Host not allowed' });
+        if (req.path.startsWith('/api') || req.path.startsWith('/download')) {
+            if (req.get('Sec-Fetch-Site') === 'cross-site') return res.status(403).json({ error: 'Cross-site request rejected' });
+            const origin = req.get('Origin');
+            if (origin && origin !== (publicOrigin || `${req.protocol}://${req.get('host')}`)) return res.status(403).json({ error: 'Cross-origin request rejected' });
+        }
+        next();
     });
-}, 60 * 60 * 1000);
+    app.use(express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', etag: false, maxAge: 0 }));
+    const security = createSecurity(app, options);
+    app.set('upload', security.upload);
+    app.set('saveOutput', security.saveOutput);
+    app.use('/api', security.rateLimit);
+    // Return 501 before parsing or writing uploads for tools with no processing logic.
+    for (const tool of placeholders) app.post(`/api/${tool}`, (req, res) => res.status(501).json({ error: 'Not implemented yet', message: `${tool} functionality coming soon` }));
+    app.use('/api', security.session);
+    app.use('/api/image-to-pdf', require('./routes/imageToPdf'));
+    app.use('/api/edit', require('./routes/edit'));
+    app.use('/api/sign', require('./routes/sign'));
+    app.get('/download/:filename', security.rateLimit, security.session, security.download);
+    app.use((err, req, res, next) => {
+        if (res.headersSent) return next(err);
+        res.status(400).json({ error: 'Invalid request' });
+    });
+    const cleanup = () => security.cleanupOldFiles().catch(() => console.error('Periodic cleanup failed'));
+    cleanup();
+    const timer = setInterval(cleanup, 60 * 1000);
+    timer.unref();
+    app.set('closeSecurity', () => clearInterval(timer));
+    app.set('cleanupFiles', security.cleanupOldFiles);
+    return app;
+}
 
-app.listen(PORT, () => {
-    console.log(`PDF Toolkit server running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+    const app = createApp();
+    const port = process.env.PORT || 3000;
+    const host = process.env.HOST || '127.0.0.1';
+    const server = app.listen(port, host, () => console.log(`ClickPDF server listening on ${host}:${port}`));
+    server.requestTimeout = 60 * 1000;
+    server.headersTimeout = 15 * 1000;
+}
+
+module.exports = { createApp };

@@ -181,7 +181,7 @@
 
         <!-- Tool Workspace -->
         <section id="workspace" class="workspace hidden">
-            <button class="back-btn" onclick="showToolGrid()">← Back to Tools</button>
+            <button class="back-btn" data-action="showToolGrid">← Back to Tools</button>
             
             <!-- Image to PDF Tool -->
             <div id="image-to-pdf-tool" class="tool-workspace">
@@ -227,7 +227,7 @@
                                 </select>
                             </div>
                             <div class="option-group">
-                                <label for="margin">Margin (px)</label>
+                                <label for="margin">Margin (PDF points)</label>
                                 <input type="number" id="margin" name="margin" value="20" min="0" max="100">
                             </div>
                             <div class="option-group">
@@ -271,7 +271,7 @@
                     <div id="edit-pdf-info" class="file-info hidden">
                         <span class="file-icon">📄</span>
                         <span id="edit-pdf-name" class="file-name-display"></span>
-                        <button type="button" class="remove-file-btn" onclick="removeEditPdf()">×</button>
+                        <button type="button" class="remove-file-btn" data-action="removeEditPdf">×</button>
                     </div>
 
                     <div class="options-panel">
@@ -374,7 +374,7 @@
                     <div id="sign-pdf-info" class="file-info hidden">
                         <span class="file-icon">📄</span>
                         <span id="sign-pdf-name" class="file-name-display"></span>
-                        <button type="button" class="remove-file-btn" onclick="removeSignPdf()">×</button>
+                        <button type="button" class="remove-file-btn" data-action="removeSignPdf">×</button>
                     </div>
 
                     <div class="options-panel">
@@ -397,7 +397,7 @@
                             <div class="signature-pad-container">
                                 <canvas id="signature-pad" width="400" height="150"></canvas>
                             </div>
-                            <button type="button" class="clear-signature-btn" onclick="clearSignature()">Clear Signature</button>
+                            <button type="button" class="clear-signature-btn" data-action="clearSignature">Clear Signature</button>
                         </div>
                         
                         <div id="upload-signature-panel" class="signature-panel hidden">

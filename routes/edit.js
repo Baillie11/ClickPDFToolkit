@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const { number, IMAGE_OPTIONS } = require('../lib/security');
 
 router.post('/', async (req, res) => {
     const upload = req.app.get('upload');
-    const outputDir = req.app.get('outputDir');
+    const saveOutput = req.app.get('saveOutput');
 
     upload.fields([
         { name: 'pdf', maxCount: 1 },
@@ -27,7 +26,7 @@ router.post('/', async (req, res) => {
             const pdfDoc = await PDFDocument.load(pdfBytes);
             
             // Get edit parameters
-            const pageNumber = parseInt(req.body.pageNumber) || 1;
+            const pageNumber = number(req.body, 'pageNumber', 1, 1, 10000, true);
             const pages = pdfDoc.getPages();
             
             if (pageNumber < 1 || pageNumber > pages.length) {
@@ -41,9 +40,9 @@ router.post('/', async (req, res) => {
             // Add text if provided
             if (req.body.text && req.body.text.trim()) {
                 const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-                const fontSize = parseInt(req.body.fontSize) || 12;
-                const textX = parseFloat(req.body.textX) || 50;
-                const textY = parseFloat(req.body.textY) || 50;
+                const fontSize = number(req.body, 'fontSize', 12, 8, 72, true);
+                const textX = number(req.body, 'textX', 50, 0, 100, false);
+                const textY = number(req.body, 'textY', 50, 0, 100, false);
                 
                 // Parse color (hex to rgb)
                 let textColor = rgb(0, 0, 0);
@@ -81,13 +80,13 @@ router.post('/', async (req, res) => {
                 } else {
                     // Try to convert using sharp if available
                     const sharp = require('sharp');
-                    const pngBuffer = await sharp(imageBytes).png().toBuffer();
+                    const pngBuffer = await sharp(imageBytes, IMAGE_OPTIONS).png().toBuffer();
                     image = await pdfDoc.embedPng(pngBuffer);
                 }
                 
-                const imageX = parseFloat(req.body.imageX) || 50;
-                const imageY = parseFloat(req.body.imageY) || 50;
-                const imageScale = parseFloat(req.body.imageScale) || 100;
+                const imageX = number(req.body, 'imageX', 50, 0, 100, false);
+                const imageY = number(req.body, 'imageY', 50, 0, 100, false);
+                const imageScale = number(req.body, 'imageScale', 100, 10, 200, false);
                 
                 const scaleFactor = imageScale / 100;
                 const imgWidth = image.width * scaleFactor * 0.5;
@@ -109,24 +108,18 @@ router.post('/', async (req, res) => {
             // Save the edited PDF
             const editedPdfBytes = await pdfDoc.save();
             
-            let baseFilename = req.body.outputFilename || 'edited-pdf';
-            baseFilename = baseFilename.replace(/[^a-zA-Z0-9-_\s]/g, '').trim() || 'edited-pdf';
-            const outputFilename = `${baseFilename}-${uuidv4().slice(0, 8)}.pdf`;
-            const outputPath = path.join(outputDir, outputFilename);
-            
-            await fs.writeFile(outputPath, editedPdfBytes);
-            await fs.unlink(pdfFile.path);
-            
+            const outputFilename = await saveOutput(req, editedPdfBytes, req.body.outputFilename, 'edited-pdf');
+
             res.json({
                 success: true,
                 message: 'PDF edited successfully',
-                downloadUrl: `/download/${outputFilename}`,
+                downloadUrl: `/download/${encodeURIComponent(outputFilename)}`,
                 filename: outputFilename
             });
             
         } catch (error) {
-            console.error('Error editing PDF:', error);
-            res.status(500).json({ error: 'Failed to edit PDF: ' + error.message });
+            console.error('Document processing failed');
+            res.status(400).json({ error: 'Failed to edit PDF; check the document and settings' });
         }
     });
 });

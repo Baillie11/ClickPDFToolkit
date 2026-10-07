@@ -1,6 +1,10 @@
 // Click PDF Toolkit - Frontend JavaScript
 
 document.addEventListener('DOMContentLoaded', () => {
+    const actions = { showToolGrid, removeEditPdf, removeSignPdf, clearSignature };
+    document.querySelectorAll('[data-action]').forEach(button => {
+        button.addEventListener('click', actions[button.dataset.action]);
+    });
     initToolCards();
     initImageToPdf();
     initEditPdf();
@@ -161,12 +165,21 @@ function updatePreview() {
         reader.onload = (e) => {
             const item = document.createElement('div');
             item.className = 'preview-item';
-            item.innerHTML = `
-                <span class="order-badge">${index + 1}</span>
-                <img src="${e.target.result}" alt="${file.name}">
-                <button type="button" class="remove-btn" onclick="removeFile(${index})">×</button>
-                <span class="file-name">${file.name}</span>
-            `;
+            const badge = document.createElement('span');
+            badge.className = 'order-badge';
+            badge.textContent = String(index + 1);
+            const image = document.createElement('img');
+            image.src = e.target.result;
+            image.alt = file.name;
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'remove-btn';
+            remove.textContent = '×';
+            remove.addEventListener('click', () => removeFile(index));
+            const label = document.createElement('span');
+            label.className = 'file-name';
+            label.textContent = file.name;
+            item.append(badge, image, remove, label);
             previewContainer.appendChild(item);
         };
         

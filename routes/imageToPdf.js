@@ -3,12 +3,11 @@ const router = express.Router();
 const { PDFDocument } = require('pdf-lib');
 const sharp = require('sharp');
 const fs = require('fs').promises;
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const { number, IMAGE_OPTIONS } = require('../lib/security');
 
 router.post('/', async (req, res) => {
     const upload = req.app.get('upload');
-    const outputDir = req.app.get('outputDir');
+    const saveOutput = req.app.get('saveOutput');
 
     upload.array('images', 50)(req, res, async (err) => {
         if (err) {
@@ -25,7 +24,7 @@ router.post('/', async (req, res) => {
             // Get options from request
             const pageSize = req.body.pageSize || 'A4';
             const orientation = req.body.orientation || 'portrait';
-            const margin = parseInt(req.body.margin) || 20;
+            const margin = number(req.body, 'margin', 20, 0, 100, true);
             const fitMode = req.body.fitMode || 'fit'; // fit, fill, stretch
 
             // Page dimensions in points (72 points = 1 inch)
@@ -50,10 +49,9 @@ router.post('/', async (req, res) => {
                 try {
                     // Read and process image with sharp
                     const imageBuffer = await fs.readFile(file.path);
-                    const metadata = await sharp(imageBuffer).metadata();
 
                     // Convert to PNG for consistency (pdf-lib works well with PNG)
-                    const processedBuffer = await sharp(imageBuffer)
+                    const processedBuffer = await sharp(imageBuffer, IMAGE_OPTIONS)
                         .png()
                         .toBuffer();
 
@@ -98,7 +96,7 @@ router.post('/', async (req, res) => {
                     // Clean up uploaded file
                     await fs.unlink(file.path);
                 } catch (imgError) {
-                    console.error(`Error processing image ${file.originalname}:`, imgError);
+                    console.error('Image processing failed');
                     // Continue with other images
                 }
             }
@@ -111,24 +109,19 @@ router.post('/', async (req, res) => {
             const pdfBytes = await pdfDoc.save();
             
             // Use custom filename or generate one
-            let baseFilename = req.body.outputFilename || 'images-to-pdf';
-            // Sanitize filename (remove invalid characters)
-            baseFilename = baseFilename.replace(/[^a-zA-Z0-9-_\s]/g, '').trim() || 'images-to-pdf';
-            const outputFilename = `${baseFilename}-${uuidv4().slice(0, 8)}.pdf`;
-            const outputPath = path.join(outputDir, outputFilename);
-            await fs.writeFile(outputPath, pdfBytes);
+            const outputFilename = await saveOutput(req, pdfBytes, req.body.outputFilename, 'images-to-pdf');
 
             res.json({
                 success: true,
                 message: `Successfully converted ${pdfDoc.getPageCount()} image(s) to PDF`,
-                downloadUrl: `/download/${outputFilename}`,
+                downloadUrl: `/download/${encodeURIComponent(outputFilename)}`,
                 filename: outputFilename,
                 pageCount: pdfDoc.getPageCount()
             });
 
         } catch (error) {
-            console.error('Error converting images to PDF:', error);
-            res.status(500).json({ error: 'Failed to convert images to PDF: ' + error.message });
+            console.error('Document processing failed');
+            res.status(400).json({ error: 'Failed to convert images to PDF; check the document and settings' });
         }
     });
 });

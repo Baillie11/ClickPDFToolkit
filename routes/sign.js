@@ -2,13 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { PDFDocument } = require('pdf-lib');
 const fs = require('fs').promises;
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const { number, IMAGE_OPTIONS } = require('../lib/security');
 const sharp = require('sharp');
 
 router.post('/', async (req, res) => {
     const upload = req.app.get('upload');
-    const outputDir = req.app.get('outputDir');
+    const saveOutput = req.app.get('saveOutput');
 
     upload.fields([
         { name: 'pdf', maxCount: 1 },
@@ -28,7 +27,7 @@ router.post('/', async (req, res) => {
             const pdfDoc = await PDFDocument.load(pdfBytes);
             
             const pages = pdfDoc.getPages();
-            const pageNumber = parseInt(req.body.pageNumber) || 1;
+            const pageNumber = number(req.body, 'pageNumber', 1, 1, 10000, true);
             
             if (pageNumber < 1 || pageNumber > pages.length) {
                 await fs.unlink(pdfFile.path);
@@ -47,7 +46,7 @@ router.post('/', async (req, res) => {
                 const signatureBuffer = Buffer.from(base64Data, 'base64');
                 
                 // Convert to PNG with transparency preserved
-                const pngBuffer = await sharp(signatureBuffer)
+                const pngBuffer = await sharp(signatureBuffer, IMAGE_OPTIONS)
                     .png()
                     .toBuffer();
                 
@@ -59,7 +58,7 @@ router.post('/', async (req, res) => {
                 const sigBytes = await fs.readFile(sigFile.path);
                 
                 // Convert to PNG for consistency
-                const pngBuffer = await sharp(sigBytes).png().toBuffer();
+                const pngBuffer = await sharp(sigBytes, IMAGE_OPTIONS).png().toBuffer();
                 signatureImage = await pdfDoc.embedPng(pngBuffer);
                 
                 await fs.unlink(sigFile.path);
@@ -70,9 +69,9 @@ router.post('/', async (req, res) => {
             }
             
             // Position parameters (as percentages)
-            const sigX = parseFloat(req.body.signatureX) || 70;
-            const sigY = parseFloat(req.body.signatureY) || 90;
-            const sigScale = parseFloat(req.body.signatureScale) || 100;
+            const sigX = number(req.body, 'signatureX', 70, 0, 100, false);
+            const sigY = number(req.body, 'signatureY', 90, 0, 100, false);
+            const sigScale = number(req.body, 'signatureScale', 100, 10, 200, false);
             
             // Calculate signature dimensions
             const scaleFactor = sigScale / 100;
@@ -96,24 +95,18 @@ router.post('/', async (req, res) => {
             // Save the signed PDF
             const signedPdfBytes = await pdfDoc.save();
             
-            let baseFilename = req.body.outputFilename || 'signed-document';
-            baseFilename = baseFilename.replace(/[^a-zA-Z0-9-_\s]/g, '').trim() || 'signed-document';
-            const outputFilename = `${baseFilename}-${uuidv4().slice(0, 8)}.pdf`;
-            const outputPath = path.join(outputDir, outputFilename);
-            
-            await fs.writeFile(outputPath, signedPdfBytes);
-            await fs.unlink(pdfFile.path);
-            
+            const outputFilename = await saveOutput(req, signedPdfBytes, req.body.outputFilename, 'signed-document');
+
             res.json({
                 success: true,
                 message: 'PDF signed successfully',
-                downloadUrl: `/download/${outputFilename}`,
+                downloadUrl: `/download/${encodeURIComponent(outputFilename)}`,
                 filename: outputFilename
             });
             
         } catch (error) {
-            console.error('Error signing PDF:', error);
-            res.status(500).json({ error: 'Failed to sign PDF: ' + error.message });
+            console.error('Document processing failed');
+            res.status(400).json({ error: 'Failed to sign PDF; check the document and settings' });
         }
     });
 });
