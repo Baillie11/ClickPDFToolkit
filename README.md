@@ -1,6 +1,6 @@
 # ClickPDF Toolkit
 
-**ClickPDF — Free, open-source PDF tools you can run yourself.** Convert images to PDF, add text and image overlays, and place signature images through a simple Node.js / JavaScript web interface. Self-host document processing without relying on third-party online PDF services.
+**ClickPDF — Free, open-source PDF tools you can run yourself.** Merge PDFs, convert images to PDF, add text and image overlays, and place signature images through a simple Node.js / JavaScript web interface. Self-host document processing without relying on third-party online PDF services.
 
 [![MIT Licence](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/runtime-Node.js-339933.svg)](package.json)
@@ -22,7 +22,7 @@ No screenshots or hosted demo are included yet. Run locally to try the real appl
 - **Simple interface:** browse or drop files, choose settings and download a PDF.
 - **Approachable JavaScript:** Express routes and vanilla HTML/CSS/JavaScript.
 
-This early-stage free PDF toolkit currently has three implemented workflows. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
+This early-stage free PDF toolkit currently has four implemented workflows. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
 
 ## Features
 
@@ -30,6 +30,7 @@ This early-stage free PDF toolkit currently has three implemented workflows. Use
 
 | Tool | Implemented behavior | Limits |
 | --- | --- | --- |
+| Merge PDFs | Combine 2–50 PDFs in a chosen order; reorder/remove files, custom output name, preserve page sizes and rotations | 50 MiB per file, 100 MiB total, 1,000 pages. Encrypted or unreadable PDFs are rejected. Form fields are flattened; bookmarks, attachments and digital signature validity are not preserved. |
 | Image to PDF | One page per successfully processed image; A4, Letter, Legal, A3, A5; portrait/landscape; fit, fill, stretch; custom output name | Up to 50 files, 50 MiB per file, 100 MiB total; image dimension limits apply. PNG, JPEG, GIF and WebP verified. BMP is accepted by the interface but processor support is unverified. Animated GIFs are not converted frame by frame. |
 | Edit PDF | Add Helvetica text and an image overlay to a selected page; text size/color, position and image scale | Basic overlays only. No editing of existing text, redaction, annotation objects or live PDF preview. Standard-font encoding limits apply. |
 | Sign PDF | Draw a signature or upload an image, then place it on a selected page | Visual signature image only. No certificate-based digital signing or signature validation. Drawn signatures have a white background. |
@@ -40,15 +41,15 @@ Representative API workflows were verified with synthetic documents on Node.js 2
 
 | Category | Status |
 | --- | --- |
-| The three workflows above | Implemented for the stated scope, with documented limitations |
+| The four workflows above | Implemented for the stated scope, with documented limitations |
 | Broader editing / signing capabilities | Partial: overlays and visual signing exist; broader editing and cryptographic signing do not |
-| Merge, split, reorder, rotate | UI cards and API scaffolds; processing not implemented |
+| Split, reorder, rotate | UI cards and API scaffolds; processing not implemented |
 | Compress, watermark | UI cards and API scaffolds; processing not implemented |
 | Word, PowerPoint, Excel ↔ PDF | UI cards and API scaffolds; conversion not implemented |
 | HTML to PDF, PDF to image | UI cards and API scaffolds; conversion not implemented |
 | Protect, unlock, OCR, extract text | UI cards and API scaffolds; processing not implemented |
 
-All 18 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon” expresses intended scope, not a delivery date. Do not upload documents to these endpoints expecting processing.
+All 17 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon” expresses intended scope, not a delivery date. Do not upload documents to these endpoints expecting processing.
 
 ## Installation
 
@@ -76,10 +77,12 @@ There is no build step. The server creates `uploads/` and `output/` and needs wr
 
 ## Usage
 
-1. Select **Image to PDF**, **Edit PDF** or **Sign PDF**.
+1. Select **Merge PDFs**, **Image to PDF**, **Edit PDF** or **Sign PDF**.
 2. Browse or drop input files into the upload area.
 3. Choose page settings, overlay content, or a drawn/uploaded signature and target page.
 4. Run the operation and download the result.
+
+For **Merge PDFs**, add at least two files, use **Move up / Move down** to set document order, remove unwanted entries, choose an output name and select **Merge PDFs**. All pages from each document are appended in order; a bad input fails the whole merge. Existing PDF metadata such as bookmarks is not carried across.
 
 Image selection order determines page order; remove unwanted images before converting. Custom output names receive a full random UUID suffix. Download in the same browser session within its one-hour lifetime. Links do not work in another browser or after a server restart.
 
@@ -89,6 +92,7 @@ Margins use PDF points; zero margin and zero coordinates are supported. Numeric 
 
 | Endpoint | Multipart input |
 | --- | --- |
+| `POST /api/merge` | Repeated `pdfs` files in merge order, optional `outputFilename` |
 | `POST /api/image-to-pdf` | Repeated `images` files and page options |
 | `POST /api/edit` | `pdf`, optional `overlayImage`, text and placement options |
 | `POST /api/sign` | `pdf` and `signatureImage` or `signatureData` |
@@ -116,7 +120,7 @@ For shared hosting, use access restrictions, HTTPS and resource limits, and addr
 
 ```text
 public/       HTML, CSS and browser JavaScript
-routes/       Three implemented tools and 18 placeholder handlers
+routes/       Four implemented tools and 17 placeholder handlers
 server.js     Express, uploads, downloads and cleanup
 docs/         API reference and repository review
 uploads/      Runtime input files (ignored)
@@ -133,7 +137,8 @@ Suggested priorities, with no promised release dates:
 - [ ] Improve error feedback and format compatibility.
 - [x] Add workflow and security regression tests (`npm test`).
 - [ ] Add real screenshots.
-- [ ] Implement merge, split, rotate and reorder.
+- [x] Implement Merge PDFs with document ordering and form flattening.
+- [ ] Implement split, rotate and reorder.
 - [ ] Evaluate remaining conversion, compression, watermark, password and text tools before committing to their scope.
 
 ## Contributing

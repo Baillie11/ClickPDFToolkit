@@ -20,7 +20,7 @@ Open http://localhost:3000. For pull requests, work in a fork and a branch. Read
 - Explain the user task for feature requests. Discuss major changes and new processing dependencies first.
 - Keep changes focused, preserve working workflows and retain MIT licensing.
 - Describe the resulting behavior, limitations and validation in your pull request. Update feature status and API docs when behavior changes.
-- Check upload, processing, download and failure paths. Inspect generated PDFs; HTTP 200 alone is insufficient. Check all three workflows when shared server/upload code changes.
+- Check upload, processing, download and failure paths. Inspect generated PDFs; HTTP 200 alone is insufficient. Check all four workflows when shared server/upload code changes.
 - Add meaningful regression checks for application fixes where appropriate. Documentation changes need command, link and claim checks.
 - Keep uploads, outputs, dependencies, environment files and sensitive samples out of commits.
 

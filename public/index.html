@@ -21,11 +21,11 @@
             <div class="tool-category">
                 <h2>Merge & Organize</h2>
                 <div class="tools">
-                    <div class="tool-card" data-tool="merge">
+                    <div class="tool-card active" data-tool="merge" role="button" tabindex="0">
                         <div class="tool-icon">🔗</div>
                         <h3>Merge PDFs</h3>
                         <p>Combine multiple PDFs into one</p>
-                        <span class="status coming-soon">Coming Soon</span>
+                        <span class="status available">Available</span>
                     </div>
                     <div class="tool-card" data-tool="split">
                         <div class="tool-icon">✂️</div>
@@ -182,6 +182,41 @@
         <!-- Tool Workspace -->
         <section id="workspace" class="workspace hidden">
             <button class="back-btn" data-action="showToolGrid">← Back to Tools</button>
+
+            <div id="merge-tool" class="tool-workspace hidden">
+                <h2>🔗 Merge PDFs</h2>
+                <p>Combine documents into one PDF, in the order you choose.</p>
+                <form id="merge-pdf-form">
+                    <fieldset id="merge-controls" class="merge-controls">
+                        <legend class="sr-only">Choose and order PDF files</legend>
+                        <div id="merge-upload-area" class="upload-area">
+                            <div class="upload-icon" aria-hidden="true">📄</div>
+                            <label for="merge-input">Drop PDFs here or choose files</label>
+                            <input type="file" id="merge-input" name="pdfs" multiple accept="application/pdf,.pdf" aria-describedby="merge-limits">
+                            <p id="merge-limits" class="hint">2–50 PDFs · 50 MiB per file · 100 MiB total · up to 1,000 pages</p>
+                        </div>
+                        <p id="merge-summary" role="status" class="hint">Choose at least two PDFs to get started.</p>
+                        <ol id="merge-file-list" class="merge-file-list" aria-label="PDF merge order"></ol>
+                        <button type="button" id="merge-clear" class="back-btn" disabled>Clear files</button>
+                        <div class="options-panel">
+                            <label for="merge-output-filename">Output filename</label>
+                            <div class="filename-input-wrapper">
+                                <input type="text" id="merge-output-filename" maxlength="100" value="merged-document" aria-label="Output filename without PDF extension">
+                                <span class="file-extension">.pdf</span>
+                            </div>
+                            <p class="hint">Pages keep their original sizes and rotation. Form fields become non-editable. Bookmarks, attachments and digital signature validity are not preserved.</p>
+                        </div>
+                        <button type="submit" class="convert-btn" id="merge-btn" disabled>Merge PDFs</button>
+                    </fieldset>
+                </form>
+                <p id="merge-error" class="error-message hidden" role="alert"></p>
+                <div id="merge-result" class="result hidden" role="status">
+                    <h3>Your merged PDF is ready</h3>
+                    <p id="merge-result-message"></p>
+                    <a id="merge-download-link" class="download-btn" download>Download merged PDF</a>
+                    <p class="hint">Download in this browser before the session expires (within one hour).</p>
+                </div>
+            </div>
             
             <!-- Image to PDF Tool -->
             <div id="image-to-pdf-tool" class="tool-workspace">
@@ -465,6 +500,7 @@
         </div>
     </footer>
 
+    <script src="/js/merge.js"></script>
     <script src="/js/app.js"></script>
 </body>
 </html>

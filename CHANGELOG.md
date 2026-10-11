@@ -4,6 +4,15 @@ This file records changes from the repository presentation update onward. The pa
 
 ## Unreleased
 
+### Added — 2026-10-12
+
+- Merge PDFs: combine 2–50 documents in a chosen order, with move-up/down and remove controls, size/count validation and a custom output filename.
+- Preserve page sizes, rotations and page content; flatten form fields to avoid name collisions between documents.
+- Reject encrypted, unreadable, empty and excessive inputs without saving a partial result. Limit merged output to 1,000 pages and reuse session-owned downloads and upload cleanup.
+- Add merge API, ordering/form/error regressions and interface-state tests. Four tools are now implemented; 17 remain placeholders.
+
+### Repository presentation
+
 - Repositioned the README around free, open-source PDF tools users can self-host.
 - Documented three implemented workflows, their limits and 18 HTTP 501 scaffolds.
 - Added API, contributor, security, privacy and screenshot guidance.
@@ -21,4 +30,4 @@ This file records changes from the repository presentation update onward. The pa
 - Replaced UUID and Nodemon with built-in Node.js crypto and watch mode; require Node.js 20.19+.
 - Added `npm test` for workflow and security regressions.
 
-No new PDF tools were added. API clients must preserve session cookies for downloads. Downloads expire within one hour and are invalidated by restart. Invalid/out-of-range inputs are now rejected. Zero coordinates and margins are supported.
+The earlier security update added no PDF tools. API clients must preserve session cookies for downloads. Downloads expire within one hour and are invalidated by restart. Invalid/out-of-range inputs are rejected. Zero coordinates and margins are supported.

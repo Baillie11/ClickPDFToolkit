@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', actions[button.dataset.action]);
     });
     initToolCards();
+    initMergePdf();
     initImageToPdf();
     initEditPdf();
     initSignPdf();
@@ -32,19 +33,23 @@ function showTool(tool) {
     const editTool = document.getElementById('edit-tool');
     const signTool = document.getElementById('sign-tool');
     const comingSoonTool = document.getElementById('coming-soon-tool');
+    const mergeTool = document.getElementById('merge-tool');
     
     // Hide all tools first
     imageToPdfTool.classList.add('hidden');
     editTool.classList.add('hidden');
     signTool.classList.add('hidden');
     comingSoonTool.classList.add('hidden');
+    mergeTool.classList.add('hidden');
     
     // Hide tool grid, show workspace
     toolGrid.classList.add('hidden');
     workspace.classList.remove('hidden');
     
     // Show appropriate tool
-    if (tool === 'image-to-pdf') {
+    if (tool === 'merge') {
+        mergeTool.classList.remove('hidden');
+    } else if (tool === 'image-to-pdf') {
         imageToPdfTool.classList.remove('hidden');
     } else if (tool === 'edit') {
         editTool.classList.remove('hidden');
@@ -92,6 +97,7 @@ function showToolGrid() {
     resetImageToPdfForm();
     resetEditPdfForm();
     resetSignPdfForm();
+    resetMergePdfForm();
 }
 
 // Initialize range sliders to show values

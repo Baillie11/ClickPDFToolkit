@@ -119,7 +119,7 @@ test('malformed documents, fields and signatures are rejected without retained u
 test('all placeholders return 501 without persisting uploaded documents', async t => {
     const f = await fixture(t);
     const { pdf } = await inputs();
-    for (const route of ['merge', 'split', 'compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'rotate', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text', 'reorder']) {
+    for (const route of ['split', 'compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'rotate', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text', 'reorder']) {
         assert.equal((await f.post('/api/' + route, {}, [['pdf', pdf, 'sample.pdf', 'application/pdf']])).response.status, 501);
     }
     await f.uploadsEmpty();
@@ -161,8 +161,8 @@ test('file, aggregate, field and request-rate limits reject abusive requests and
     assert.equal((await f.post('/api/sign', { signatureData: 'x'.repeat(1024 * 1024 + 1) }, [])).response.status, 413);
     await f.uploadsEmpty();
     const limited = await fixture(t, { rateLimit: 1 });
-    assert.equal((await limited.post('/api/merge')).response.status, 501);
-    const rejected = await limited.post('/api/merge');
+    assert.equal((await limited.post('/api/split')).response.status, 501);
+    const rejected = await limited.post('/api/split');
     assert.equal(rejected.response.status, 429);
     assert.ok(Number(rejected.response.headers.get('retry-after')) > 0);
 });
@@ -238,4 +238,113 @@ test('preview renders malicious filenames as text and retains the remove control
     assert.equal(preview.children.length, 0);
     assert.equal(button.disabled, true);
     assert.doesNotMatch(await fs.readFile(path.join(__dirname, '../public/index.html'), 'utf8'), /\son(?:click|change|input)=/);
+});
+
+test('merge preserves requested page order, dimensions, rotations and document content', async t => {
+    const { degrees, PDFName } = require('pdf-lib');
+    const f = await fixture(t);
+    const a = await PDFDocument.create();
+    a.addPage([300, 400]).drawText('Document A page 1');
+    a.addPage([500, 600]).drawText('Document A page 2');
+    const b = await PDFDocument.create();
+    const page = b.addPage([700, 800]);
+    page.setRotation(degrees(90));
+    const { png } = await inputs();
+    page.drawImage(await b.embedPng(png), { x: 20, y: 20, width: 120, height: 80 });
+    const files = [['pdfs', await b.save(), 'second.pdf', 'application/pdf'], ['pdfs', await a.save(), 'first.pdf', 'application/pdf']];
+    const { response, data } = await f.post('/api/merge', { outputFilename: 'Combined pack' }, files);
+    assert.equal(response.status, 200);
+    assert.equal(data.pageCount, 3);
+    assert.equal(data.fileCount, 2);
+    assert.equal(data.flattenedFormCount, 0);
+    assert.match(data.filename, /^Combined pack-[a-f0-9-]+\.pdf$/);
+    const result = await fetch(f.url + data.downloadUrl, { headers: { Cookie: f.cookie() } });
+    const merged = await PDFDocument.load(await result.arrayBuffer());
+    assert.deepEqual(merged.getPages().map(p => [p.getWidth(), p.getHeight(), p.getRotation().angle]), [[700, 800, 90], [300, 400, 0], [500, 600, 0]]);
+    assert.ok(merged.getPage(0).node.Resources().lookup(PDFName.of('XObject')).keys().length);
+    assert.ok(merged.getPage(1).node.Resources().lookup(PDFName.of('Font')).keys().length);
+    assert.equal((await fetch(f.url + data.downloadUrl)).status, 404);
+    await f.uploadsEmpty();
+});
+
+test('merge flattens form values and does not collide same-name fields', async t => {
+    const f = await fixture(t);
+    const files = [];
+    for (const value of ['Alpha', 'Beta']) {
+        const doc = await PDFDocument.create();
+        const page = doc.addPage([300, 400]);
+        const field = doc.getForm().createTextField('shared-name');
+        field.setText(value);
+        field.addToPage(page, { x: 30, y: 30, width: 150, height: 30 });
+        files.push(['pdfs', await doc.save(), `${value}.pdf`, 'application/pdf']);
+    }
+    const { response, data } = await f.post('/api/merge', {}, files);
+    assert.equal(response.status, 200);
+    assert.equal(data.flattenedFormCount, 2);
+    const result = await fetch(f.url + data.downloadUrl, { headers: { Cookie: f.cookie() } });
+    const merged = await PDFDocument.load(await result.arrayBuffer());
+    assert.equal(merged.getPageCount(), 2);
+    assert.equal(merged.getForm().getFields().length, 0);
+    for (const page of merged.getPages()) assert.ok(page.node.Contents());
+    await f.uploadsEmpty();
+});
+
+test('merge rejects incomplete, corrupt, encrypted and excessive inputs without partial output', async t => {
+    const { PDFName } = require('pdf-lib');
+    const f = await fixture(t);
+    const { pdf } = await inputs();
+    const good = ['pdfs', pdf, 'valid.pdf', 'application/pdf'];
+    const encrypted = await PDFDocument.create();
+    encrypted.addPage();
+    // A marked-encrypted fixture tests rejection, not password decryption support.
+    encrypted.context.trailerInfo.Encrypt = encrypted.context.register(encrypted.context.obj({ Filter: PDFName.of('Standard') }));
+    const oversized = await PDFDocument.create();
+    for (let i = 0; i < 1000; i++) oversized.addPage([10, 10]);
+    const empty = await PDFDocument.create();
+    const cases = [[], [good], [good, ['pdfs', Buffer.from('not PDF'), 'bad.pdf', 'application/pdf']], [good, ['pdfs', Buffer.from('%PDF-corrupt'), 'bad.pdf', 'application/pdf']], [good, ['pdfs', await encrypted.save(), 'encrypted.pdf', 'application/pdf']], [good, ['pdfs', await oversized.save(), 'large.pdf', 'application/pdf']], [good, ['pdfs', await empty.save({ addDefaultPage: false }), 'empty.pdf', 'application/pdf']]];
+    for (const files of cases) {
+        assert.equal((await f.post('/api/merge', {}, files)).response.status, 400);
+        await f.uploadsEmpty();
+        assert.deepEqual(await fs.readdir(path.join(f.root, 'output')), []);
+    }
+    assert.equal((await f.post('/api/merge', {}, Array.from({ length: 51 }, () => good))).response.status, 413);
+    await f.uploadsEmpty();
+});
+
+test('merge interface orders files, removes entries, handles limits and submits the visible order', async () => {
+    class Element {
+        constructor(tag = 'div') { this.tag = tag; this.children = []; this.events = {}; this.attributes = {}; this.value = ''; this.disabled = false; this.classList = { add() {}, remove() {}, toggle() {} }; }
+        replaceChildren(...items) { this.children = items; }
+        appendChild(item) { this.children.push(item); }
+        addEventListener(type, callback) { this.events[type] = callback; }
+        setAttribute(key, value) { this.attributes[key] = value; }
+        removeAttribute(key) { delete this.attributes[key]; }
+        focus() {}
+        querySelector() { return this.children.find(child => child.tag === 'button' && !child.disabled); }
+    }
+    const elements = new Map();
+    const document = { getElementById(id) { if (!elements.has(id)) elements.set(id, new Element()); return elements.get(id); }, createElement: tag => new Element(tag), querySelector: () => new Element() };
+    let submitted;
+    const context = vm.createContext({ document, AbortController, queueMicrotask, showTool() {}, FormData: class { constructor() { this.entries = []; } append(...entry) { this.entries.push(entry); } }, fetch: async (url, options) => { submitted = options.body.entries; return { ok: true, json: async () => ({ success: true, message: 'Merged 2 PDFs into 2 pages.', downloadUrl: '/download/result.pdf', flattenedFormCount: 0 }) }; } });
+    vm.runInContext(await fs.readFile(path.join(__dirname, '../public/js/merge.js'), 'utf8'), context);
+    const evilName = '<img onerror=alert(1)>.pdf';
+    context.files = [{ name: evilName, size: 100, type: 'application/pdf' }, { name: 'second.pdf', size: 200, type: 'application/pdf' }];
+    vm.runInContext('initMergePdf(); addMergeFiles(files);', context);
+    const list = document.getElementById('merge-file-list');
+    assert.match(list.children[0].children[0].textContent, /<img onerror=alert\(1\)>/);
+    assert.equal(document.getElementById('merge-btn').disabled, false);
+    list.children[1].children[1].events.click();
+    assert.match(list.children[0].children[0].textContent, /second.pdf/);
+    document.getElementById('merge-output-filename').value = 'Ordered result';
+    await vm.runInContext('submitMergePdf({preventDefault(){}})', context);
+    assert.deepEqual(submitted.filter(([key]) => key === 'pdfs').map(([, file]) => file.name), ['second.pdf', evilName]);
+    assert.equal(document.getElementById('merge-download-link').href, '/download/result.pdf');
+    list.children[0].children[3].events.click();
+    assert.equal(list.children.length, 1);
+    assert.equal(document.getElementById('merge-btn').disabled, true);
+    vm.runInContext('addMergeFiles([{name:"too-big.pdf",size:60*1024*1024,type:"application/pdf"}]);', context);
+    assert.match(document.getElementById('merge-error').textContent, /50 MiB/);
+    assert.equal(list.children.length, 1);
+    vm.runInContext('resetMergePdfForm();', context);
+    assert.equal(list.children.length, 0);
 });

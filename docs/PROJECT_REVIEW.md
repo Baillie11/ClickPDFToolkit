@@ -1,10 +1,10 @@
 # Security review and hosting guidance
 
-Updated 2026-10-08. The initial repository review inspected source commit `d6faa58`; this document now describes the local security fixes layered on that checkout. Three PDF workflows remain implemented; the other 18 endpoints still return HTTP 501. No new PDF features were added.
+Updated 2026-10-12. The initial repository review inspected source commit `d6faa58`; this document now describes the local security fixes layered on that checkout. Four PDF workflows are implemented, including Merge PDFs; the other 17 endpoints still return HTTP 501.
 
 ## Verification
 
-`npm test` exercises existing conversions, text/image overlays, both signature inputs, PDF downloads, session ownership, expiry, invalid content/options, upload limits, rate/concurrency limits, aborted-upload cleanup, host/origin checks, HTTPS proxy cookies and safe filename rendering. Samples are synthetic. PNG/JPEG/GIF/WebP outputs are parsed with pdf-lib. The suite includes a DOM regression check for malicious filenames; it is not a full interactive browser compatibility test.
+`npm test` exercises merge order/page dimensions/rotation, form flattening, rejected or excessive merge inputs, merge interface state, existing conversions, text/image overlays, both signature inputs, PDF downloads, session ownership, expiry, invalid content/options, upload limits, rate/concurrency limits, aborted-upload cleanup, host/origin checks, HTTPS proxy cookies and safe filename rendering. Samples are synthetic. PNG/JPEG/GIF/WebP outputs are parsed with pdf-lib. The suite includes a DOM regression check for malicious filenames; it is not a full interactive browser compatibility test.
 
 ## Security and privacy findings
 
@@ -46,13 +46,13 @@ Use a reverse proxy or private network with operator-managed authentication and 
 
 ## PDF workflow limitations
 
-The editor adds overlays, not edits to existing content. Signing embeds an image, not a cryptographic signature. Standard Helvetica has text encoding limits. Drawn signatures have a white background. BMP backend compatibility remains unverified. Fill can extend into margins, and failures during full decoding may skip an image after initial validation. No new converter or editing features were added.
+The editor adds overlays, not edits to existing content. Signing embeds an image, not a cryptographic signature. Standard Helvetica has text encoding limits. Drawn signatures have a white background. BMP backend compatibility remains unverified. Fill can extend into margins, and failures during full decoding may skip an image after initial validation. Merge PDFs accepts 2–50 documents and up to 1,000 pages. It flattens forms and does not preserve document-level bookmarks, attachments or digital signature validity.
 
 ## GitHub discoverability
 
 Recommended About description:
 
-> Free, open-source PDF tools you can self-host. Convert images to PDF, add text and image overlays, and place signature images through a simple Node.js web interface.
+> Free, open-source PDF tools you can self-host. Merge PDFs, convert images to PDF, add text and image overlays, and place signature images through a simple Node.js web interface.
 
 Topics: `pdf`, `pdf-tools`, `pdf-converter`, `pdf-editor`, `image-to-pdf`, `nodejs`, `javascript`, `self-hosted`, `open-source`, `privacy`, `document-tools`.
 

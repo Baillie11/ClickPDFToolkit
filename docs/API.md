@@ -12,6 +12,20 @@ curl -b clickpdf-cookies.tmp -o result.pdf "http://localhost:3000/download/<retu
 
 Replace the placeholder with the returned URL-encoded filename. Do not share or commit cookie jars. Keep the same hostname for upload and download (localhost and 127.0.0.1 have different browser cookie scopes).
 
+## Merge PDFs
+
+`POST /api/merge`
+
+Send **2–50** files using repeated `pdfs` fields in the intended document order, plus optional `outputFilename` (default `merged-document`). Each file may be up to 50 MiB; combined file bytes may be up to 100 MiB. The merged result may contain up to 1,000 pages.
+
+```bash
+curl -c clickpdf-cookies.tmp -b clickpdf-cookies.tmp -F "pdfs=@first.pdf" -F "pdfs=@second.pdf" -F "outputFilename=combined-pack" http://localhost:3000/api/merge
+```
+
+Success returns `success`, `message`, `filename`, `downloadUrl`, `fileCount`, `pageCount` and `flattenedFormCount` (number of source documents whose form fields were flattened). Download using the same session cookie.
+
+Pages retain their sizes, rotation and page content. Interactive form fields become non-editable to prevent field-name collisions. Encrypted, empty, unreadable or unsupported complex-form PDFs return 400; no partial PDF is saved. The page limit also returns 400; upload limits return 413. Output storage failures return a generic 500. Bookmarks, embedded attachments and digital signature validity are not preserved. Merging is not a document sanitization service.
+
 ## Image to PDF
 
 `POST /api/image-to-pdf`
@@ -97,6 +111,6 @@ Invalid content, missing input, invalid pages and invalid options return 400 wit
 
 These routes perform no document processing and return 501 for otherwise accepted requests:
 
-`/api/merge`, `/api/split`, `/api/compress`, `/api/pdf-to-word`, `/api/word-to-pdf`, `/api/pdf-to-ppt`, `/api/ppt-to-pdf`, `/api/pdf-to-excel`, `/api/excel-to-pdf`, `/api/pdf-to-image`, `/api/watermark`, `/api/rotate`, `/api/html-to-pdf`, `/api/unlock`, `/api/protect`, `/api/ocr`, `/api/extract-text`, `/api/reorder`.
+`/api/split`, `/api/compress`, `/api/pdf-to-word`, `/api/word-to-pdf`, `/api/pdf-to-ppt`, `/api/ppt-to-pdf`, `/api/pdf-to-excel`, `/api/excel-to-pdf`, `/api/pdf-to-image`, `/api/watermark`, `/api/rotate`, `/api/html-to-pdf`, `/api/unlock`, `/api/protect`, `/api/ocr`, `/api/extract-text`, `/api/reorder`.
 
 The server returns 501 before parsing or saving uploads. Do not use these routes as converters.

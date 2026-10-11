@@ -1,4 +1,15 @@
 /* Reset and Base Styles */
+.merge-controls { border: 0; min-width: 0; }
+.merge-file-list { list-style: none; padding: 0; margin: 20px 0; }
+.merge-file-list li { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 14px; margin-bottom: 8px; border: 1px solid #d1d5db; border-radius: 8px; }
+.merge-file-description { flex: 1 1 240px; overflow-wrap: anywhere; }
+.merge-file-list button { padding: 8px 12px; background: #eff6ff; border: 1px solid #93c5fd; border-radius: 6px; cursor: pointer; color: #1d4ed8; }
+.merge-file-list button:disabled { opacity: 0.45; cursor: default; }
+#merge-input { display: block; margin: 16px auto; max-width: 100%; }
+#merge-upload-area label { font-weight: 600; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+[data-tool="merge"]:focus-visible, .merge-file-list button:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+
 * {
     margin: 0;
     padding: 0;
