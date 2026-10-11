@@ -1,4 +1,4 @@
-/* Reset and Base Styles */
+﻿/* Reset and Base Styles */
 .merge-controls { border: 0; min-width: 0; }
 .merge-file-list { list-style: none; padding: 0; margin: 20px 0; }
 .merge-file-list li { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 14px; margin-bottom: 8px; border: 1px solid #d1d5db; border-radius: 8px; }
@@ -700,6 +700,16 @@ footer .copyright {
     color: var(--gray-400);
 }
 
+footer .copyright a {
+    color: var(--primary-light, #93c5fd);
+    text-decoration: none;
+}
+
+footer .copyright a:hover {
+    text-decoration: underline;
+    color: white;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .tools {
@@ -845,6 +855,760 @@ footer .copyright {
     }
 }
 
+/* ==================== EDIT PDF EDITOR ==================== */
+
+/* Editor container */
+.edit-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Toolbar - Icon + Label style */
+.edit-toolbar {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    gap: 2px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tb-group {
+    display: flex;
+    gap: 2px;
+}
+
+.tb-divider {
+    width: 1px;
+    height: 44px;
+    background: var(--gray-200);
+    margin: 0 6px;
+    flex-shrink: 0;
+}
+
+.tb-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 10px;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--gray-500);
+    min-width: 50px;
+    position: relative;
+}
+
+.tb-btn svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.tb-btn span {
+    font-size: 0.65rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.tb-btn:hover:not(:disabled) {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.tb-btn.active {
+    color: var(--primary-color);
+    background: #eff6ff;
+    border-color: rgba(37, 99, 235, 0.25);
+}
+
+.tb-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Options Bar below toolbar */
+.edit-options-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 14px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tb-options-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tb-options-group label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--gray-500);
+    white-space: nowrap;
+}
+
+.tb-options-spacer {
+    flex: 1;
+}
+
+.toolbar-input {
+    width: 56px;
+    padding: 5px 6px;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.toolbar-color {
+    width: 28px;
+    height: 28px;
+    padding: 1px;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.toolbar-range {
+    width: 80px;
+    height: 6px;
+}
+
+.toolbar-filename {
+    max-width: 200px;
+}
+
+.toolbar-filename input {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+}
+
+.toolbar-filename .file-extension {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+}
+
+/* Legacy toolbar-btn support for sig panel buttons */
+.toolbar-btn {
+    padding: 8px 16px;
+    background: white;
+    border: 2px solid var(--gray-300);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toolbar-btn:hover {
+    border-color: var(--primary-color);
+}
+
+.toolbar-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Page Navigation */
+.edit-page-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 8px;
+}
+
+.page-nav-btn {
+    padding: 6px 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.page-nav-btn:hover:not(:disabled) {
+    background: var(--primary-hover);
+}
+
+.page-nav-btn:disabled {
+    background: var(--gray-300);
+    cursor: not-allowed;
+}
+
+#edit-page-indicator {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+/* Canvas Container */
+.edit-canvas-container {
+    position: relative;
+    border: 2px solid var(--gray-300);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #e5e5e5;
+    cursor: crosshair;
+}
+
+#edit-pdf-canvas {
+    display: block;
+    width: 100%;
+}
+
+.edit-annotations-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Edit Text Overlays */
+.edit-text-overlay {
+    position: absolute;
+    pointer-events: all;
+    z-index: 8;
+    cursor: text;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: border-color 0.15s, background 0.15s;
+    overflow: hidden;
+}
+
+.edit-text-overlay:hover {
+    border-color: rgba(37, 99, 235, 0.4);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.edit-text-overlay.editing {
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 12;
+    overflow: visible;
+}
+
+.edit-text-overlay.modified {
+    border-color: rgba(245, 158, 11, 0.5);
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.edit-text-overlay.modified:hover {
+    border-color: rgba(245, 158, 11, 0.8);
+}
+
+.edit-text-input {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: Helvetica, Arial, sans-serif;
+    padding: 0 1px;
+    margin: 0;
+    color: #000;
+    box-sizing: border-box;
+}
+
+.edit-text-notice {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    pointer-events: all;
+    z-index: 20;
+}
+
+/* Annotation Overlay - positioned at exact text location */
+.edit-ann-overlay {
+    position: absolute;
+    pointer-events: all;
+    z-index: 10;
+}
+
+.edit-ann-overlay:hover .edit-ann-delete,
+.edit-ann-overlay:hover .edit-ann-handle,
+.edit-ann-overlay:hover .edit-ann-resize {
+    opacity: 1;
+}
+
+.edit-ann-overlay.dragging {
+    opacity: 0.7;
+}
+
+/* Drag handle - absolutely positioned to the left */
+.edit-ann-handle {
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: grab;
+    user-select: none;
+    font-size: 14px;
+    color: var(--gray-400);
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+    padding: 2px 4px;
+    line-height: 1;
+}
+
+.edit-ann-handle:hover {
+    color: var(--primary-color);
+}
+
+.edit-ann-handle:active {
+    cursor: grabbing;
+}
+
+.edit-ann-input {
+    display: block;
+    background: rgba(255, 255, 200, 0.5);
+    border: 1px dashed rgba(0, 0, 0, 0.25);
+    border-radius: 2px;
+    padding: 1px 2px;
+    outline: none;
+    min-width: 60px;
+    width: 120px;
+    font-family: Helvetica, Arial, sans-serif;
+    cursor: text;
+    box-sizing: border-box;
+}
+
+.edit-ann-input:focus {
+    background: rgba(255, 255, 200, 0.8);
+    border-color: var(--primary-color);
+}
+
+.edit-ann-input::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+    font-style: italic;
+}
+
+/* Resize handle - absolutely positioned to the right */
+.edit-ann-resize {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+    user-select: none;
+    border-right: 3px solid var(--gray-400);
+    opacity: 0;
+    transition: opacity 0.15s, border-color 0.15s;
+}
+
+.edit-ann-resize:hover {
+    border-color: var(--primary-color);
+}
+
+/* Delete button - absolutely positioned top-right */
+.edit-ann-delete {
+    position: absolute;
+    top: -8px;
+    left: 100%;
+    margin-left: 2px;
+    width: 18px;
+    height: 18px;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 12px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Annotations Panel */
+.edit-annotations-panel {
+    background: var(--gray-50);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.edit-annotations-panel h3 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    color: var(--gray-700);
+}
+
+.edit-annotations-panel h3 span {
+    color: var(--gray-400);
+    font-weight: normal;
+}
+
+.edit-ann-empty {
+    color: var(--gray-400);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 12px;
+}
+
+.edit-annotations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.edit-ann-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid var(--gray-200);
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.edit-ann-list-item:hover {
+    border-color: var(--primary-color);
+}
+
+.edit-ann-list-item.current-page {
+    border-left: 3px solid var(--primary-color);
+}
+
+.edit-ann-list-page {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--gray-200);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--gray-600);
+    white-space: nowrap;
+}
+
+.edit-ann-list-text {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edit-ann-list-info {
+    font-size: 0.75rem;
+    color: var(--gray-400);
+    white-space: nowrap;
+}
+
+.edit-ann-list-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid var(--gray-300);
+    flex-shrink: 0;
+}
+
+.edit-ann-list-delete {
+    width: 22px;
+    height: 22px;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 13px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.edit-ann-list-delete:hover {
+    opacity: 1;
+}
+
+/* Responsive for editor */
+@media (max-width: 768px) {
+    .edit-toolbar {
+        gap: 2px;
+        padding: 6px;
+    }
+
+    .tb-divider {
+        display: none;
+    }
+
+    .tb-btn {
+        padding: 4px 6px;
+        min-width: 40px;
+    }
+
+    .tb-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .tb-btn span {
+        font-size: 0.55rem;
+    }
+
+    .edit-options-bar {
+        gap: 8px;
+        padding: 6px 10px;
+    }
+
+    .toolbar-filename {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+/* ==================== PDF TO IMAGE ==================== */
+.p2i-result-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: white;
+}
+
+.p2i-result-item img {
+    width: 100%;
+    display: block;
+}
+
+.p2i-result-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: var(--gray-100);
+}
+
+.p2i-result-actions .file-name {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+.p2i-download-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: white;
+    border: 1px solid var(--primary-color);
+    transition: all 0.2s;
+}
+
+.p2i-download-link:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* ==================== EDIT SIGNATURE PANEL ==================== */
+.edit-sig-panel {
+    background: var(--gray-50);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.edit-sig-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.edit-sig-tab {
+    flex: 1;
+    padding: 8px 16px;
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.edit-sig-tab:hover {
+    border-color: var(--primary-color);
+}
+
+.edit-sig-tab.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.edit-sig-pad-container {
+    background: white;
+    border: 2px solid var(--gray-300);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.edit-sig-pad-container canvas {
+    width: 100%;
+    height: 120px;
+    display: block;
+    cursor: crosshair;
+}
+
+.edit-sig-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.edit-sig-actions .toolbar-btn {
+    flex: 1;
+}
+
+.edit-sig-upload-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edit-sig-preview {
+    margin-top: 12px;
+    padding: 12px;
+    background: #d1fae5;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.edit-sig-preview p {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #065f46;
+    margin-bottom: 8px;
+}
+
+.edit-sig-preview img {
+    max-height: 60px;
+    max-width: 100%;
+    display: inline-block;
+    background: white;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-200);
+}
+
+/* Signature overlay on canvas */
+.edit-sig-overlay {
+    position: absolute;
+    pointer-events: all;
+    z-index: 10;
+    border: 2px dashed rgba(37, 99, 235, 0.5);
+    cursor: move;
+    box-sizing: border-box;
+}
+
+.edit-sig-overlay:hover {
+    border-color: var(--primary-color);
+}
+
+.edit-sig-overlay.dragging {
+    opacity: 0.7;
+}
+
+.edit-sig-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+}
+
+.edit-sig-overlay .edit-ann-delete {
+    top: -10px;
+    left: calc(100% - 10px);
+    margin-left: 0;
+    z-index: 11;
+}
+
+.edit-sig-overlay:hover .edit-ann-delete {
+    opacity: 1;
+}
+
+.edit-sig-resize-handle {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border-radius: 2px;
+    cursor: nwse-resize;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 11;
+}
+
+.edit-sig-overlay:hover .edit-sig-resize-handle {
+    opacity: 1;
+}
+
+/* Rectangle overlay (highlight / whiteout) */
+.edit-rect-overlay {
+    position: absolute;
+    pointer-events: all;
+    z-index: 9;
+    box-sizing: border-box;
+    cursor: default;
+}
+
+.edit-rect-overlay:hover {
+    outline: 2px dashed rgba(37, 99, 235, 0.5);
+}
+
+.edit-rect-overlay .edit-ann-delete {
+    top: -10px;
+    left: calc(100% - 10px);
+    margin-left: 0;
+    z-index: 11;
+}
+
+.edit-rect-overlay:hover .edit-ann-delete {
+    opacity: 1;
+}
+
 /* Error State */
 .error-message {
     background: #fee2e2;
@@ -854,3 +1618,11 @@ footer .copyright {
     margin-top: 16px;
     text-align: center;
 }
+
+/* Inline styles moved out of HTML so the page works under a strict style-src CSP. */
+.p2i-progress { margin-top: 16px; }
+.p2i-progress-track { background: var(--gray-200); border-radius: 8px; overflow: hidden; height: 8px; }
+.p2i-progress-bar { height: 100%; background: var(--primary-color); width: 0%; transition: width 0.3s; }
+.p2i-progress-text { text-align: center; margin-top: 8px; font-size: 0.9rem; color: var(--gray-500); }
+.p2i-result { margin-top: 24px; }
+.p2i-images { margin-top: 16px; }

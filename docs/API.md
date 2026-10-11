@@ -61,7 +61,7 @@ Successful response shape (illustrative filename):
 
 One page is produced per successfully processed image. Invalid or oversized image headers reject the request before conversion. Later decoding failures can still skip individual images without a per-file error list; compare `pageCount` with the upload count. Fill preserves aspect ratio but can extend into margins; stretch distorts it. GIF processing does not create a page for every animation frame.
 
-## Add text / image overlays
+## Edit PDF (text, images, shapes, drawing)
 
 `POST /api/edit`
 
@@ -81,7 +81,17 @@ One page is produced per successfully processed image. Invalid or oversized imag
 curl -c clickpdf-cookies.tmp -b clickpdf-cookies.tmp -F "pdf=@document.pdf" -F "text=Reviewed" -F "pageNumber=1" -F "fontSize=16" -F "textX=10" -F "textY=10" http://localhost:3000/api/edit
 ```
 
-This adds content; it does not edit or remove existing content. Standard Helvetica does not encode every Unicode character.
+The fields above add a single text string and/or image to one page. The web editor instead sends the JSON fields below, which can be combined freely and are applied in this order: `textEdits`, `annotations`, `signatures`, `rectangles`, `drawStrokes`, then the simple `text`/`overlayImage` fields. Each is a JSON string (a flat string field, so it counts toward the 1 MiB field limit). Coordinates are percentages of the page measured from the top-left unless noted, and `page` is a one-based integer.
+
+| Field | JSON shape and limits |
+| --- | --- |
+| `annotations` | Array (max 200) of `{ page, text, x, y, fontSize, color }`. `fontSize` 6–72, `color` `#rrggbb`, `text` up to 10,000 characters; `\n` starts a new line. The characters ✓ and ✗ are drawn with ZapfDingbats; other characters Helvetica cannot encode become `?`. |
+| `signatures` | Array (max 200) of `{ page, imageData, x, y, widthPct, heightPct }` for signatures and placed images. `x`/`y` is the top-left corner; `imageData` is a PNG, JPEG or WebP data URL. Identical images are embedded once. |
+| `rectangles` | Array (max 200) of `{ page, type, x, y, w, h, color, opacity }`; `type` is `highlight` or `whiteout`, `opacity` 1–100. |
+| `drawStrokes` | Array (max 200) of `{ page, color, size, points }`; `size` is 1–50 PDF points and `points` is `[[x, y], ...]` (at least two). At most 20,000 points in total; drawn as vector lines. |
+| `textEdits` | Array (max 200) of `{ page, newText, pdfX, pdfY, pdfWidth, fontSize, color? }` in PDF points with the origin at the bottom-left. The original line area is covered with white and `newText` is drawn on top. |
+
+The whole request is validated before anything is drawn; any invalid value returns 400 with a generic error. This adds content on top of pages. It does not remove existing content: white-out, highlights and text edits only cover it, so the original text remains in the file and is not redacted. Standard Helvetica does not encode every Unicode character.
 
 ## Place a visual signature
 

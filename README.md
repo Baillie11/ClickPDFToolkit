@@ -1,6 +1,6 @@
 # ClickPDF Toolkit
 
-**ClickPDF — Free, open-source PDF tools you can run yourself.** Merge PDFs, convert images to PDF, add text and image overlays, and place signature images through a simple Node.js / JavaScript web interface. Self-host document processing without relying on third-party online PDF services.
+**ClickPDF — Free, open-source PDF tools you can run yourself.** Merge PDFs, convert images to PDF, annotate and edit PDFs in a visual editor, convert PDF pages to images, and place signature images through a simple Node.js / JavaScript web interface. Self-host document processing without relying on third-party online PDF services.
 
 [![MIT Licence](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/runtime-Node.js-339933.svg)](package.json)
@@ -22,7 +22,7 @@ No screenshots or hosted demo are included yet. Run locally to try the real appl
 - **Simple interface:** browse or drop files, choose settings and download a PDF.
 - **Approachable JavaScript:** Express routes and vanilla HTML/CSS/JavaScript.
 
-This early-stage free PDF toolkit currently has four implemented workflows. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
+This early-stage free PDF toolkit currently has four server-side workflows plus a browser-only PDF to Image tool. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
 
 ## Features
 
@@ -32,8 +32,9 @@ This early-stage free PDF toolkit currently has four implemented workflows. Use 
 | --- | --- | --- |
 | Merge PDFs | Combine 2–50 PDFs in a chosen order; reorder/remove files, custom output name, preserve page sizes and rotations | 50 MiB per file, 100 MiB total, 1,000 pages. Encrypted or unreadable PDFs are rejected. Form fields are flattened; bookmarks, attachments and digital signature validity are not preserved. |
 | Image to PDF | One page per successfully processed image; A4, Letter, Legal, A3, A5; portrait/landscape; fit, fill, stretch; custom output name | Up to 50 files, 50 MiB per file, 100 MiB total; image dimension limits apply. PNG, JPEG, GIF and WebP verified. BMP is accepted by the interface but processor support is unverified. Animated GIFs are not converted frame by frame. |
-| Edit PDF | Add Helvetica text and an image overlay to a selected page; text size/color, position and image scale | Basic overlays only. No editing of existing text, redaction, annotation objects or live PDF preview. Standard-font encoding limits apply. |
+| Edit PDF | Visual editor with a multi-page preview: click-to-place text, check/cross marks, replace existing text lines, highlight, white-out, freehand drawing, drawn or uploaded signatures and images; move/resize, undo/redo | Adds content on top of pages. White-out and text replacement only cover the original, which stays in the file (this is not redaction). No annotation objects. Standard-font encoding limits apply; unsupported characters become `?`. Up to 1 MiB of editor data per request (images are downscaled in the browser). |
 | Sign PDF | Draw a signature or upload an image, then place it on a selected page | Visual signature image only. No certificate-based digital signing or signature validation. Drawn signatures have a white background. |
+| PDF to Image | Render every page (or just the first) to PNG or JPEG at 1×–3× scale, entirely in the browser | Nothing is uploaded. Large documents depend on browser memory. `/api/pdf-to-image` remains an unimplemented scaffold; the interface does not use it. |
 
 Representative API workflows were verified with synthetic documents on Node.js 20.20.2, and downloaded PDFs were parsed with pdf-lib. This does not establish compatibility with every browser, format or document.
 
@@ -41,12 +42,12 @@ Representative API workflows were verified with synthetic documents on Node.js 2
 
 | Category | Status |
 | --- | --- |
-| The four workflows above | Implemented for the stated scope, with documented limitations |
+| The five tools above | Implemented for the stated scope, with documented limitations |
 | Broader editing / signing capabilities | Partial: overlays and visual signing exist; broader editing and cryptographic signing do not |
 | Split, reorder, rotate | UI cards and API scaffolds; processing not implemented |
 | Compress, watermark | UI cards and API scaffolds; processing not implemented |
 | Word, PowerPoint, Excel ↔ PDF | UI cards and API scaffolds; conversion not implemented |
-| HTML to PDF, PDF to image | UI cards and API scaffolds; conversion not implemented |
+| HTML to PDF | UI card and API scaffold; conversion not implemented |
 | Protect, unlock, OCR, extract text | UI cards and API scaffolds; processing not implemented |
 
 All 17 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon” expresses intended scope, not a delivery date. Do not upload documents to these endpoints expecting processing.
@@ -96,7 +97,7 @@ Margins use PDF points; zero margin and zero coordinates are supported. Numeric 
 | --- | --- |
 | `POST /api/merge` | Repeated `pdfs` files in merge order, optional `outputFilename` |
 | `POST /api/image-to-pdf` | Repeated `images` files and page options |
-| `POST /api/edit` | `pdf`, optional `overlayImage`, text and placement options |
+| `POST /api/edit` | `pdf`; either simple text/overlay fields or the editor's JSON fields (`annotations`, `signatures`, `rectangles`, `drawStrokes`, `textEdits`) |
 | `POST /api/sign` | `pdf` and `signatureImage` or `signatureData` |
 | `GET /download/<filename>` | Generated output download; no request body |
 
@@ -104,7 +105,7 @@ Margins use PDF points; zero margin and zero coordinates are supported. Numeric 
 
 ## Technology stack
 
-Node.js · Express · pdf-lib · sharp · multer · vanilla JavaScript · HTML · CSS. Built-in Node.js crypto generates IDs and watch mode provides development restarts. No database, account system or frontend framework is implemented.
+Node.js · Express · pdf-lib · sharp · multer · vanilla JavaScript · HTML · CSS, plus [pdf.js](https://github.com/mozilla/pdf.js) 3.11.174 (Apache-2.0, bundled in `public/vendor/pdfjs`) for in-browser preview and rendering. Built-in Node.js crypto generates IDs and watch mode provides development restarts. No database, account system or frontend framework is implemented.
 
 ## Privacy and self-hosting
 
@@ -121,7 +122,7 @@ For shared hosting, use access restrictions, HTTPS and resource limits, and addr
 ## Project structure
 
 ```text
-public/       HTML, CSS and browser JavaScript
+public/       HTML, CSS, browser JavaScript and bundled pdf.js (public/vendor/pdfjs)
 routes/       Four implemented tools and 17 placeholder handlers
 server.js     Express, uploads, downloads and cleanup
 docs/         API reference and repository review

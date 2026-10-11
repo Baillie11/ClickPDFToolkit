@@ -64,6 +64,7 @@ documented 100 MiB combined upload limit in mind. Never publish `uploads/` or
 
 - Confirm the existing website works and `/ClickPDF` redirects correctly.
 - Verify the home page, stylesheet and both scripts under `/ClickPDF/`.
+- Open Edit PDF and PDF to Image with a synthetic PDF. Confirm `/ClickPDF/vendor/pdfjs/pdf.worker.min.js` loads and the browser console shows no Content-Security-Policy errors (pdf.js is bundled; no CDN is used).
 - Use synthetic documents to exercise merge, image conversion, edit and sign.
 - Inspect each output; verify a separate session cannot download it.
 - Check cross-origin requests are rejected and uploaded inputs are removed.

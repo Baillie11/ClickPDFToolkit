@@ -4,6 +4,15 @@ This file records changes from the repository presentation update onward. The pa
 
 ## Unreleased
 
+### Visual Edit PDF and PDF to Image
+
+- Edit PDF becomes a visual editor: multi-page preview, click-to-place text and check/cross marks, replace existing text lines, highlight, white-out, freehand drawing, drawn/uploaded signatures and images, move/resize and undo/redo.
+- `/api/edit` accepts the editor's JSON fields (`annotations`, `signatures`, `rectangles`, `drawStrokes`, `textEdits`) with strict server-side validation, count/size limits and the existing session-bound output storage. The single text/overlay fields still work.
+- PDF to Image renders pages to PNG or JPEG in the browser; no upload is involved and `/api/pdf-to-image` stays a 501 scaffold.
+- Bundle pdf.js 3.11.174 under `public/vendor/pdfjs` so the strict Content-Security-Policy (`script-src 'self'`) is unchanged. Editor controls use `data-action` with one delegated handler, and generated markup no longer uses inline handlers or inline styles.
+- Fix: the image tool's error clean-up removed the Merge PDFs error element, causing a script error after returning to the tool grid.
+- Add tests for editor operations, input validation and CSP-compatible markup.
+
 ### Subpath hosting preparation
 
 - Add optional `BASE_PATH` configuration, relative browser asset/API URLs, prefixed download links and scoped session cookies.

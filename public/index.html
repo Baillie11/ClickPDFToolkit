@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Click PDF Toolkit</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="vendor/pdfjs/pdf.min.js"></script>
 </head>
 <body>
     <header>
@@ -89,11 +90,11 @@
             <div class="tool-category">
                 <h2>Convert from PDF</h2>
                 <div class="tools">
-                    <div class="tool-card" data-tool="pdf-to-image">
+                    <div class="tool-card active" data-tool="pdf-to-image">
                         <div class="tool-icon">🖼️</div>
                         <h3>PDF to Image</h3>
                         <p>Convert PDF pages to images</p>
-                        <span class="status coming-soon">Coming Soon</span>
+                        <span class="status available">Available</span>
                     </div>
                     <div class="tool-card" data-tool="pdf-to-word">
                         <div class="tool-icon">📝</div>
@@ -293,94 +294,176 @@
             <!-- Edit PDF Tool -->
             <div id="edit-tool" class="tool-workspace hidden">
                 <h2>✏️ Edit PDF</h2>
-                <p>Add text and images to your PDF document.</p>
+                <p>Upload a PDF to add text, edit existing text, add signatures, or annotate. Perfect for filling in, signing, and modifying documents.</p>
                 
                 <form id="edit-pdf-form">
+                    <!-- Upload Area (shown before PDF is loaded) -->
                     <div class="upload-area" id="edit-upload-area">
                         <div class="upload-icon">📄</div>
                         <p>Drag & drop PDF here or <span class="browse-link">browse</span></p>
                         <p class="file-types">Supports: PDF files</p>
                         <input type="file" id="edit-pdf-input" name="pdf" accept=".pdf" hidden>
                     </div>
-                    
-                    <div id="edit-pdf-info" class="file-info hidden">
-                        <span class="file-icon">📄</span>
-                        <span id="edit-pdf-name" class="file-name-display"></span>
-                        <button type="button" class="remove-file-btn" data-action="removeEditPdf">×</button>
-                    </div>
 
-                    <div class="options-panel">
-                        <h3>Output Settings</h3>
-                        <div class="filename-group">
-                            <label for="edit-output-filename">File Name</label>
-                            <div class="filename-input-wrapper">
-                                <input type="text" id="edit-output-filename" name="outputFilename" placeholder="Enter filename" value="edited-document">
-                                <span class="file-extension">.pdf</span>
+                    <!-- Editor (shown after PDF is loaded) -->
+                    <div id="edit-editor" class="edit-editor hidden">
+                        <!-- File info bar -->
+                        <div id="edit-pdf-info" class="file-info">
+                            <span class="file-icon">📄</span>
+                            <span id="edit-pdf-name" class="file-name-display"></span>
+                            <button type="button" class="remove-file-btn" data-action="removeEditPdf">×</button>
+                        </div>
+
+                        <!-- Toolbar -->
+                        <div class="edit-toolbar">
+                            <!-- Undo / Redo -->
+                            <div class="tb-group">
+                                <button type="button" class="tb-btn" id="edit-undo-btn" data-action="editUndo" title="Undo" disabled>
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h10a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5H12"/><path d="M7 6l-4 4 4 4"/></svg>
+                                    <span>Undo</span>
+                                </button>
+                                <button type="button" class="tb-btn" id="edit-redo-btn" data-action="editRedo" title="Redo" disabled>
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10H11a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h1"/><path d="M17 6l4 4-4 4"/></svg>
+                                    <span>Redo</span>
+                                </button>
+                            </div>
+                            <div class="tb-divider"></div>
+                            <!-- Text / Sign -->
+                            <div class="tb-group">
+                                <button type="button" class="tb-btn active" id="edit-mode-text" data-action="setEditMode" data-arg="text" title="Add text">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12"/><path d="M12 4v16"/><path d="M8 20h8"/></svg>
+                                    <span>Text</span>
+                                </button>
+                                <button type="button" class="tb-btn" id="edit-mode-edittext" data-action="setEditMode" data-arg="edittext" title="Edit existing text">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    <span>Edit Text</span>
+                                </button>
+                                <button type="button" class="tb-btn" id="edit-mode-sign" data-action="setEditMode" data-arg="signature" title="Add signature">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4L7 21H3v-4L17 3z"/></svg>
+                                    <span>Sign</span>
+                                </button>
+                            </div>
+                            <div class="tb-divider"></div>
+                            <!-- Highlight / Whiteout -->
+                            <div class="tb-group">
+                                <button type="button" class="tb-btn" id="edit-mode-highlight" data-action="setEditMode" data-arg="highlight" title="Highlight area">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="7" rx="1" fill="#fbbf24" opacity="0.5" stroke="none"/><path d="M14.5 2.5l5 5L8 19H3v-5L14.5 2.5z"/></svg>
+                                    <span>Highlight</span>
+                                </button>
+                                <button type="button" class="tb-btn" id="edit-mode-whiteout" data-action="setEditMode" data-arg="whiteout" title="White-out area">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" fill="white"/><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+                                    <span>Whiteout</span>
+                                </button>
+                            </div>
+                            <div class="tb-divider"></div>
+                            <!-- Image / Draw -->
+                            <div class="tb-group">
+                                <button type="button" class="tb-btn" id="edit-mode-image" data-action="setEditMode" data-arg="image" title="Add image">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                    <span>Image</span>
+                                </button>
+                                <button type="button" class="tb-btn" id="edit-mode-draw" data-action="setEditMode" data-arg="draw" title="Freehand draw">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7H12v-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+                                    <span>Draw</span>
+                                </button>
+                            </div>
+                            <div class="tb-divider"></div>
+                            <!-- Check / Cross -->
+                            <div class="tb-group">
+                                <button type="button" class="tb-btn" id="edit-mode-check" data-action="setEditMode" data-arg="check" title="Place checkmark">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+                                    <span>Check</span>
+                                </button>
+                                <button type="button" class="tb-btn" id="edit-mode-cross" data-action="setEditMode" data-arg="cross" title="Place cross">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>
+                                    <span>Cross</span>
+                                </button>
                             </div>
                         </div>
-                        
-                        <h3>Add Text</h3>
-                        <div class="options-grid">
-                            <div class="option-group full-width">
-                                <label for="edit-text">Text to Add</label>
-                                <input type="text" id="edit-text" name="text" placeholder="Enter text to add to PDF">
+
+                        <!-- Options Bar (contextual) -->
+                        <div class="edit-options-bar" id="edit-options-bar">
+                            <div class="tb-options-group" id="edit-text-options">
+                                <label for="edit-font-size">Size</label>
+                                <input type="number" id="edit-font-size" value="14" min="6" max="72" class="toolbar-input">
+                                <label for="edit-text-color">Color</label>
+                                <input type="color" id="edit-text-color" value="#000000" class="toolbar-color">
                             </div>
-                            <div class="option-group">
-                                <label for="edit-font-size">Font Size</label>
-                                <input type="number" id="edit-font-size" name="fontSize" value="16" min="8" max="72">
+                            <div class="tb-options-group hidden" id="edit-draw-options">
+                                <label for="edit-draw-size">Stroke</label>
+                                <input type="number" id="edit-draw-size" value="3" min="1" max="20" class="toolbar-input">
+                                <label for="edit-draw-color">Color</label>
+                                <input type="color" id="edit-draw-color" value="#000000" class="toolbar-color">
                             </div>
-                            <div class="option-group">
-                                <label for="edit-text-color">Text Color</label>
-                                <input type="color" id="edit-text-color" name="textColor" value="#000000">
+                            <div class="tb-options-group hidden" id="edit-highlight-options">
+                                <label for="edit-highlight-color">Color</label>
+                                <input type="color" id="edit-highlight-color" value="#fbbf24" class="toolbar-color">
+                                <label for="edit-highlight-opacity">Opacity</label>
+                                <input type="range" id="edit-highlight-opacity" value="40" min="10" max="80" class="toolbar-range">
                             </div>
-                            <div class="option-group">
-                                <label for="edit-text-x">Position X (%)</label>
-                                <input type="range" id="edit-text-x" name="textX" value="10" min="0" max="100">
-                                <span class="range-value" id="edit-text-x-value">10%</span>
-                            </div>
-                            <div class="option-group">
-                                <label for="edit-text-y">Position Y (%)</label>
-                                <input type="range" id="edit-text-y" name="textY" value="10" min="0" max="100">
-                                <span class="range-value" id="edit-text-y-value">10%</span>
-                            </div>
-                        </div>
-                        
-                        <h3>Add Image (Optional)</h3>
-                        <div class="options-grid">
-                            <div class="option-group full-width">
-                                <label>Overlay Image</label>
-                                <div class="image-upload-btn">
-                                    <input type="file" id="edit-overlay-image" name="overlayImage" accept="image/*">
+                            <div class="tb-options-spacer"></div>
+                            <div class="tb-options-group">
+                                <label for="edit-output-filename">Filename</label>
+                                <div class="filename-input-wrapper toolbar-filename">
+                                    <input type="text" id="edit-output-filename" placeholder="edited-document" value="edited-document">
+                                    <span class="file-extension">.pdf</span>
                                 </div>
                             </div>
-                            <div class="option-group">
-                                <label for="edit-image-x">Image X (%)</label>
-                                <input type="range" id="edit-image-x" name="imageX" value="50" min="0" max="100">
-                                <span class="range-value" id="edit-image-x-value">50%</span>
+                        </div>
+
+                        <!-- Hidden file input for image tool -->
+                        <input type="file" id="edit-image-input" accept="image/*" hidden>
+
+                        <!-- Signature Panel (shown when Add Signature mode is active) -->
+                        <div id="edit-sig-panel" class="edit-sig-panel hidden">
+                            <div class="edit-sig-tabs">
+                                <button type="button" class="edit-sig-tab active" data-tab="draw" data-action="switchEditSigTab" data-arg="draw">✏️ Draw</button>
+                                <button type="button" class="edit-sig-tab" data-tab="upload" data-action="switchEditSigTab" data-arg="upload">📁 Upload Image</button>
                             </div>
-                            <div class="option-group">
-                                <label for="edit-image-y">Image Y (%)</label>
-                                <input type="range" id="edit-image-y" name="imageY" value="50" min="0" max="100">
-                                <span class="range-value" id="edit-image-y-value">50%</span>
+                            <div id="edit-sig-draw-panel" class="edit-sig-content">
+                                <div class="edit-sig-pad-container">
+                                    <canvas id="edit-signature-pad" width="400" height="120"></canvas>
+                                </div>
+                                <div class="edit-sig-actions">
+                                    <button type="button" class="clear-signature-btn" data-action="clearEditSignature">Clear</button>
+                                    <button type="button" class="toolbar-btn" data-action="confirmEditSignature" id="edit-sig-confirm-btn" disabled>✅ Confirm — Click PDF to Place</button>
+                                </div>
                             </div>
-                            <div class="option-group">
-                                <label for="edit-image-scale">Image Scale (%)</label>
-                                <input type="range" id="edit-image-scale" name="imageScale" value="100" min="10" max="200">
-                                <span class="range-value" id="edit-image-scale-value">100%</span>
+                            <div id="edit-sig-upload-panel" class="edit-sig-content hidden">
+                                <div class="edit-sig-upload-row">
+                                    <input type="file" id="edit-sig-upload-input" accept="image/*">
+                                    <p class="hint">PNG with transparent background works best</p>
+                                </div>
+                            </div>
+                            <div id="edit-sig-preview" class="edit-sig-preview hidden">
+                                <p>Signature ready — click on the PDF to place it</p>
+                                <img id="edit-sig-preview-img" alt="Signature preview">
                             </div>
                         </div>
-                        
-                        <h3>Page Settings</h3>
-                        <div class="options-grid">
-                            <div class="option-group">
-                                <label for="edit-page-number">Page Number</label>
-                                <input type="number" id="edit-page-number" name="pageNumber" value="1" min="1">
+
+                        <!-- PDF Preview with page navigation -->
+                        <div class="edit-page-nav">
+                            <button type="button" id="edit-prev-page" class="page-nav-btn" data-action="editGoToPage" data-arg="-1" disabled>← Prev</button>
+                            <span id="edit-page-indicator">Page 1 of 1</span>
+                            <button type="button" id="edit-next-page" class="page-nav-btn" data-action="editGoToPage" data-arg="1" disabled>Next →</button>
+                        </div>
+
+                        <div class="edit-canvas-container" id="edit-canvas-container">
+                            <canvas id="edit-pdf-canvas"></canvas>
+                            <div id="edit-annotations-layer" class="edit-annotations-layer"></div>
+                        </div>
+
+                        <!-- Annotations List -->
+                        <div class="edit-annotations-panel">
+                            <h3>Annotations <span id="edit-ann-count">(0)</span></h3>
+                            <div id="edit-annotations-list" class="edit-annotations-list">
+                                <p class="edit-ann-empty">Click on the PDF above to add text fields or signatures.</p>
                             </div>
                         </div>
                     </div>
 
                     <button type="submit" class="convert-btn" id="edit-btn" disabled>
-                        <span class="btn-text">Apply Changes</span>
+                        <span class="btn-text">Apply Changes & Download</span>
                         <span class="btn-loading hidden">Processing...</span>
                     </button>
                 </form>
@@ -481,6 +564,82 @@
                 </div>
             </div>
 
+            <!-- PDF to Image Tool -->
+            <div id="pdf-to-image-tool" class="tool-workspace hidden">
+                <h2>🖼️ PDF to Image</h2>
+                <p>Convert each page of your PDF into an image. Choose format, quality and scale.</p>
+
+                <div class="upload-area" id="p2i-upload-area">
+                    <div class="upload-icon">📄</div>
+                    <p>Drag & drop PDF here or <span class="browse-link">browse</span></p>
+                    <p class="file-types">Supports: PDF files</p>
+                    <input type="file" id="p2i-pdf-input" accept=".pdf" hidden>
+                </div>
+
+                <div id="p2i-editor" class="edit-editor hidden">
+                    <div id="p2i-pdf-info" class="file-info">
+                        <span class="file-icon">📄</span>
+                        <span id="p2i-pdf-name" class="file-name-display"></span>
+                        <button type="button" class="remove-file-btn" data-action="removeP2iPdf">×</button>
+                    </div>
+
+                    <div class="options-panel">
+                        <h3>Output Settings</h3>
+                        <div class="options-grid">
+                            <div class="option-group">
+                                <label for="p2i-format">Image Format</label>
+                                <select id="p2i-format">
+                                    <option value="png">PNG</option>
+                                    <option value="jpeg">JPEG</option>
+                                </select>
+                            </div>
+                            <div class="option-group">
+                                <label for="p2i-scale">Scale</label>
+                                <select id="p2i-scale">
+                                    <option value="1">1x (Standard)</option>
+                                    <option value="2" selected>2x (High Quality)</option>
+                                    <option value="3">3x (Ultra)</option>
+                                </select>
+                            </div>
+                            <div class="option-group" id="p2i-quality-group">
+                                <label for="p2i-quality">JPEG Quality (%)</label>
+                                <input type="range" id="p2i-quality" value="92" min="50" max="100">
+                                <span class="range-value" id="p2i-quality-value">92%</span>
+                            </div>
+                            <div class="option-group">
+                                <label for="p2i-pages">Pages</label>
+                                <select id="p2i-pages">
+                                    <option value="all">All Pages</option>
+                                    <option value="first">First Page Only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="convert-btn" id="p2i-btn" data-action="convertPdfToImage">
+                        <span class="btn-text">Convert to Images</span>
+                        <span class="btn-loading hidden">Converting...</span>
+                    </button>
+
+                    <!-- Progress -->
+                    <div id="p2i-progress" class="hidden p2i-progress">
+                        <div class="p2i-progress-track">
+                            <div id="p2i-progress-bar" class="p2i-progress-bar"></div>
+                        </div>
+                        <p id="p2i-progress-text" class="p2i-progress-text"></p>
+                    </div>
+                </div>
+
+                <div id="p2i-result" class="hidden p2i-result">
+                    <div class="result">
+                        <div class="success-icon">✅</div>
+                        <h3>Conversion Complete!</h3>
+                        <p id="p2i-result-message"></p>
+                    </div>
+                    <div id="p2i-images" class="image-preview p2i-images"></div>
+                </div>
+            </div>
+
             <!-- Placeholder for other tools -->
             <div id="coming-soon-tool" class="tool-workspace hidden">
                 <h2 id="coming-soon-title">Tool Name</h2>
@@ -496,7 +655,7 @@
     <footer>
         <div class="container">
             <p class="app-name">📄 Click PDF Toolkit</p>
-            <p class="copyright">&copy; 2024 Click PDF Toolkit. All rights reserved.</p>
+            <p class="copyright">&copy; 2026 Click PDF Toolkit. Powered by <a href="https://www.clickecommerce.com.au" target="_blank" rel="noopener noreferrer">Click eCommerce</a></p>
         </div>
     </footer>
 

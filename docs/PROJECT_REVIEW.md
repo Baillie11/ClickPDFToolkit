@@ -46,7 +46,7 @@ Use a reverse proxy or private network with operator-managed authentication and 
 
 ## PDF workflow limitations
 
-The editor adds overlays, not edits to existing content. Signing embeds an image, not a cryptographic signature. Standard Helvetica has text encoding limits. Drawn signatures have a white background. BMP backend compatibility remains unverified. Fill can extend into margins, and failures during full decoding may skip an image after initial validation. Merge PDFs accepts 2–50 documents and up to 1,000 pages. It flattens forms and does not preserve document-level bookmarks, attachments or digital signature validity.
+The editor adds overlays, not edits to existing content: white-out and text replacement cover the original, which remains in the file and is not redacted. Signing embeds an image, not a cryptographic signature. Standard Helvetica has text encoding limits. Drawn signatures have a white background. BMP backend compatibility remains unverified. Fill can extend into margins, and failures during full decoding may skip an image after initial validation. Merge PDFs accepts 2–50 documents and up to 1,000 pages. It flattens forms and does not preserve document-level bookmarks, attachments or digital signature validity.
 
 ## GitHub discoverability
 
