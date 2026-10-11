@@ -111,7 +111,7 @@ async function submitMergePdf(event) {
     mergeFiles.forEach(file => body.append('pdfs', file));
     body.append('outputFilename', document.getElementById('merge-output-filename').value.trim() || 'merged-document');
     try {
-        const response = await fetch('/api/merge', { method: 'POST', body, signal: controller.signal });
+        const response = await fetch('api/merge', { method: 'POST', body, signal: controller.signal });
         const data = await response.json();
         if (mergeRequest !== controller) return;
         if (!response.ok || !data.success) throw new Error(data.error || 'Merge failed. Please try again.');

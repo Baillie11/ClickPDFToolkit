@@ -77,6 +77,8 @@ There is no build step. The server creates `uploads/` and `output/` and needs wr
 
 ## Usage
 
+For installation under a URL path such as `/ClickPDF/`, set `BASE_PATH=/ClickPDF` and follow the [deployment guide](docs/DEPLOYMENT.md). Assets, API calls, download links and session cookies support this prefix. Live deployment still needs to be verified.
+
 1. Select **Merge PDFs**, **Image to PDF**, **Edit PDF** or **Sign PDF**.
 2. Browse or drop input files into the upload area.
 3. Choose page settings, overlay content, or a drawn/uploaded signature and target page.

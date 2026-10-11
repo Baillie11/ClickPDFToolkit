@@ -8,6 +8,21 @@ const placeholders = ['split', 'compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to
 function createApp(options = {}) {
     const app = express();
     app.disable('x-powered-by');
+    const basePath = options.basePath ?? process.env.BASE_PATH ?? '';
+    if (basePath && !/^\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*$/.test(basePath)) {
+        throw new Error('BASE_PATH must be empty or a path such as /ClickPDF without a trailing slash');
+    }
+    app.set('basePath', basePath);
+    if (basePath) app.use((req, res, next) => {
+        if (req.path === basePath) {
+            const query = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+            return res.redirect(308, `${basePath}/${query}`);
+        }
+        if (!req.path.startsWith(`${basePath}/`)) return res.sendStatus(404);
+        // Strip only our configured mount path; all security checks below still apply.
+        req.url = req.url.slice(basePath.length);
+        next();
+    });
     const root = options.storageRoot || __dirname;
     for (const [setting, folder] of [['uploadDir', 'uploads'], ['outputDir', 'output']]) {
         const dir = path.join(root, folder);

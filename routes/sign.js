@@ -100,7 +100,7 @@ router.post('/', async (req, res) => {
             res.json({
                 success: true,
                 message: 'PDF signed successfully',
-                downloadUrl: `/download/${encodeURIComponent(outputFilename)}`,
+                downloadUrl: `${req.app.get('basePath')}/download/${encodeURIComponent(outputFilename)}`,
                 filename: outputFilename
             });
             

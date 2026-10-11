@@ -239,7 +239,7 @@ async function handleImageToPdfSubmit(e) {
         formData.append('fitMode', document.getElementById('fit-mode').value);
         formData.append('outputFilename', document.getElementById('output-filename').value || 'my-document');
         
-        const response = await fetch('/api/image-to-pdf', {
+        const response = await fetch('api/image-to-pdf', {
             method: 'POST',
             body: formData
         });
@@ -386,7 +386,7 @@ async function handleEditPdfSubmit(e) {
             formData.append('imageScale', document.getElementById('edit-image-scale').value);
         }
         
-        const response = await fetch('/api/edit', {
+        const response = await fetch('api/edit', {
             method: 'POST',
             body: formData
         });
@@ -632,7 +632,7 @@ async function handleSignPdfSubmit(e) {
             }
         }
         
-        const response = await fetch('/api/sign', {
+        const response = await fetch('api/sign', {
             method: 'POST',
             body: formData
         });

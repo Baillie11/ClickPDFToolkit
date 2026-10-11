@@ -1,5 +1,7 @@
 # ClickPDF API
 
+When `BASE_PATH=/ClickPDF`, prefix all endpoint paths below with `/ClickPDF` (for example, `/ClickPDF/api/merge`). Returned download URLs include the prefix. Retain the session cookie and use the returned URL unchanged. See [deployment guidance](DEPLOYMENT.md).
+
 Base URL for local use: `http://localhost:3000`. POST endpoints use `multipart/form-data`; let your client set its boundary. File limit: 50 MiB per file. Downloads require the session cookie set by an implemented API request. There is no account/login system. Use trusted inputs and retain cookies between upload and download. Requests from other browser origins are rejected.
 
 Limits also include 100 MiB combined file bytes, 50 files, 20 fields, 1 MiB per field, 25 million pixels per image, 50 million combined uploaded image pixels, two active jobs, and 30 API requests plus 60 downloads per 10 minutes per connected IP. SVG inputs are rejected. Fields must be flat scalar strings. Coordinates range from 0–100, scales from 10–200, font size from 8–72, and page number is a positive integer.

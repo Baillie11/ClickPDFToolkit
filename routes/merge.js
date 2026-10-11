@@ -41,7 +41,7 @@ router.post('/', (req, res) => {
                 success: true,
                 message: `Merged ${req.files.length} PDFs into ${pageCount} pages.`,
                 filename,
-                downloadUrl: `/download/${encodeURIComponent(filename)}`,
+                downloadUrl: `${req.app.get('basePath')}/download/${encodeURIComponent(filename)}`,
                 fileCount: req.files.length,
                 pageCount,
                 flattenedFormCount

@@ -114,7 +114,7 @@ router.post('/', async (req, res) => {
             res.json({
                 success: true,
                 message: `Successfully converted ${pdfDoc.getPageCount()} image(s) to PDF`,
-                downloadUrl: `/download/${encodeURIComponent(outputFilename)}`,
+                downloadUrl: `${req.app.get('basePath')}/download/${encodeURIComponent(outputFilename)}`,
                 filename: outputFilename,
                 pageCount: pdfDoc.getPageCount()
             });

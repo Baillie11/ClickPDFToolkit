@@ -51,6 +51,51 @@ async function inputs() {
     return { png, pdf: await doc.save() };
 }
 
+test('subpath hosting serves assets and all workflows with scoped, protected downloads', async t => {
+    const f = await fixture(t, { basePath: '/ClickPDF' });
+    const redirect = await fetch(f.url + '/ClickPDF?test=1', { redirect: 'manual' });
+    assert.equal(redirect.status, 308);
+    assert.equal(redirect.headers.get('location'), '/ClickPDF/?test=1');
+    const home = await fetch(f.url + '/ClickPDF/');
+    assert.equal(home.status, 200);
+    const html = await home.text();
+    for (const asset of ['css/styles.css', 'js/app.js', 'js/merge.js']) {
+        assert.ok(html.includes(`"${asset}"`));
+        assert.equal((await fetch(f.url + '/ClickPDF/' + asset)).status, 200);
+    }
+    assert.equal((await fetch(f.url + '/')).status, 404);
+    assert.equal((await fetch(f.url + '/ClickPDF-other/')).status, 404);
+    const { pdf, png } = await inputs();
+    const file = ['pdf', pdf, 'sample.pdf', 'application/pdf'];
+    const cases = [
+        ['merge', {}, [['pdfs', pdf, 'one.pdf', 'application/pdf'], ['pdfs', pdf, 'two.pdf', 'application/pdf']], 4],
+        ['image-to-pdf', {}, [['images', png, 'image.png', 'image/png']], 1],
+        ['edit', { text: 'Subpath test' }, [file], 2],
+        ['sign', {}, [file, ['signatureImage', png, 'signature.png', 'image/png']], 2]
+    ];
+    for (const [tool, fields, files, pages] of cases) {
+        const { response, data } = await f.post('/ClickPDF/api/' + tool, fields, files, { Cookie: '' });
+        assert.equal(response.status, 200);
+        assert.match(response.headers.get('set-cookie'), /Path=\/ClickPDF\//);
+        assert.ok(data.downloadUrl.startsWith('/ClickPDF/download/'));
+        const result = await fetch(f.url + data.downloadUrl, { headers: { Cookie: f.cookie() } });
+        assert.equal(result.status, 200);
+        assert.equal((await PDFDocument.load(await result.arrayBuffer())).getPageCount(), pages);
+        assert.equal((await fetch(f.url + data.downloadUrl)).status, 404);
+        assert.equal((await fetch(f.url + data.downloadUrl, { headers: { Cookie: f.cookie(), Origin: 'https://evil.example' } })).status, 403);
+        await f.uploadsEmpty();
+    }
+    assert.equal((await f.post('/ClickPDF/api/merge', {}, [], { Origin: 'https://evil.example' })).response.status, 403);
+    assert.equal((await f.post('/ClickPDF/api/merge', {}, [], { 'Sec-Fetch-Site': 'cross-site' })).response.status, 403);
+    assert.equal((await f.post('/ClickPDF/api/split')).response.status, 501);
+});
+
+test('invalid deployment prefixes fail before creating storage', () => {
+    for (const basePath of ['/', '/ClickPDF/', '//example.com', '/a/../b', '/a?b', '/a#b']) {
+        assert.throws(() => createApp({ basePath }), /BASE_PATH/);
+    }
+});
+
 test('all existing workflows generate PDFs; downloads require the creating session', async t => {
     const f = await fixture(t);
     const { png, pdf } = await inputs();

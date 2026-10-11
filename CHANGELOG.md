@@ -4,6 +4,12 @@ This file records changes from the repository presentation update onward. The pa
 
 ## Unreleased
 
+### Subpath hosting preparation
+
+- Add optional `BASE_PATH` configuration, relative browser asset/API URLs, prefixed download links and scoped session cookies.
+- Test all four workflows and access controls under `/ClickPDF/` as well as the existing root installation.
+- Add deployment guidance covering runtime support, private storage, proxy path handling and live verification. No hosted deployment is claimed.
+
 ### Added — 2026-10-12
 
 - Merge PDFs: combine 2–50 documents in a chosen order, with move-up/down and remove controls, size/count validation and a custom output filename.
