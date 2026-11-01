@@ -1,6 +1,6 @@
 # ClickPDF Toolkit
 
-**ClickPDF — Free, open-source PDF tools you can run yourself.** Merge PDFs, convert images to PDF, annotate and edit PDFs in a visual editor, convert PDF pages to images, and place signature images through a simple Node.js / JavaScript web interface. Self-host document processing without relying on third-party online PDF services.
+**ClickPDF — Free, open-source PDF tools you can run yourself.** Merge and split PDFs, extract pages, convert images to PDF, annotate and edit PDFs in a visual editor, convert PDF pages to images, and place signature images through a simple Node.js / JavaScript web interface. Self-host document processing without relying on third-party online PDF services.
 
 [![MIT Licence](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/runtime-Node.js-339933.svg)](package.json)
@@ -22,7 +22,7 @@ No screenshots or hosted demo are included yet. Run locally to try the real appl
 - **Simple interface:** browse or drop files, choose settings and download a PDF.
 - **Approachable JavaScript:** Express routes and vanilla HTML/CSS/JavaScript.
 
-This early-stage free PDF toolkit currently has four server-side workflows plus a browser-only PDF to Image tool. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
+This early-stage free PDF toolkit currently has five server-side workflows plus a browser-only PDF to Image tool. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
 
 ## Features
 
@@ -30,6 +30,7 @@ This early-stage free PDF toolkit currently has four server-side workflows plus 
 
 | Tool | Implemented behavior | Limits |
 | --- | --- | --- |
+| Split / Extract PDF | Extract selected pages into one PDF, split into ranges, or save every page separately; preserve listed order, page sizes and rotations | 50 MiB input, 1,000 source pages, 50 output files, 100 MiB combined output. Individual downloads, no ZIP. Form fields are flattened. Bookmarks, attachments and digital signature validity are not preserved. Not secure redaction. |
 | Merge PDFs | Combine 2–50 PDFs in a chosen order; reorder/remove files, custom output name, preserve page sizes and rotations | 50 MiB per file, 100 MiB total, 1,000 pages. Encrypted or unreadable PDFs are rejected. Form fields are flattened; bookmarks, attachments and digital signature validity are not preserved. |
 | Image to PDF | One page per successfully processed image; A4, Letter, Legal, A3, A5; portrait/landscape; fit, fill, stretch; custom output name | Up to 50 files, 50 MiB per file, 100 MiB total; image dimension limits apply. PNG, JPEG, GIF and WebP verified. BMP is accepted by the interface but processor support is unverified. Animated GIFs are not converted frame by frame. |
 | Edit PDF | Visual editor with a multi-page preview: click-to-place text, check/cross marks, replace existing text lines, highlight, white-out, freehand drawing, drawn or uploaded signatures and images; move/resize, undo/redo | Adds content on top of pages. White-out and text replacement only cover the original, which stays in the file (this is not redaction). No annotation objects. Standard-font encoding limits apply; unsupported characters become `?`. Up to 1 MiB of editor data per request (images are downscaled in the browser). |
@@ -42,15 +43,15 @@ Representative API workflows were verified with synthetic documents on Node.js 2
 
 | Category | Status |
 | --- | --- |
-| The five tools above | Implemented for the stated scope, with documented limitations |
+| The six tools above | Implemented for the stated scope, with documented limitations |
 | Broader editing / signing capabilities | Partial: overlays and visual signing exist; broader editing and cryptographic signing do not |
-| Split, reorder, rotate | UI cards and API scaffolds; processing not implemented |
+| Reorder, rotate | UI cards and API scaffolds; processing not implemented |
 | Compress, watermark | UI cards and API scaffolds; processing not implemented |
 | Word, PowerPoint, Excel ↔ PDF | UI cards and API scaffolds; conversion not implemented |
 | HTML to PDF | UI card and API scaffold; conversion not implemented |
 | Protect, unlock, OCR, extract text | UI cards and API scaffolds; processing not implemented |
 
-All 17 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon” expresses intended scope, not a delivery date. Do not upload documents to these endpoints expecting processing.
+All 16 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon” expresses intended scope, not a delivery date. Do not upload documents to these endpoints expecting processing.
 
 ## Installation
 
@@ -77,6 +78,8 @@ npm run dev
 There is no build step. The server creates `uploads/` and `output/` and needs write permission to them. The server binds to `127.0.0.1` by default. `PORT` changes the port; remote hosting requires explicit `HOST`, `ALLOWED_HOSTS` and, for a TLS reverse proxy, `PUBLIC_ORIGIN` configuration. See [hosting guidance](docs/PROJECT_REVIEW.md#hosting-configuration). No API key is required. `.env` files are not loaded automatically.
 
 ## Usage
+
+For **Split / Extract PDF**, upload one PDF and choose a mode. Enter page positions such as `1-3, 5, 8-10`. Extraction creates one file; range mode creates one file per comma-separated entry. Separate-page mode supports at most 50 pages. Selections cannot overlap. Download each result individually in the same browser session.
 
 For installation under a URL path such as `/ClickPDF/`, set `BASE_PATH=/ClickPDF` and follow the [deployment guide](docs/DEPLOYMENT.md). Assets, API calls, download links and session cookies support this prefix. Live deployment still needs to be verified.
 
@@ -123,7 +126,7 @@ For shared hosting, use access restrictions, HTTPS and resource limits, and addr
 
 ```text
 public/       HTML, CSS, browser JavaScript and bundled pdf.js (public/vendor/pdfjs)
-routes/       Four implemented tools and 17 placeholder handlers
+routes/       Five implemented tools and 16 placeholder handlers
 server.js     Express, uploads, downloads and cleanup
 docs/         API reference and repository review
 uploads/      Runtime input files (ignored)
@@ -141,7 +144,8 @@ Suggested priorities, with no promised release dates:
 - [x] Add workflow and security regression tests (`npm test`).
 - [ ] Add real screenshots.
 - [x] Implement Merge PDFs with document ordering and form flattening.
-- [ ] Implement split, rotate and reorder.
+- [x] Implement split/extract pages, range outputs and separate-page outputs.
+- [ ] Implement rotate and a dedicated page reorder interface.
 - [ ] Evaluate remaining conversion, compression, watermark, password and text tools before committing to their scope.
 
 ## Contributing

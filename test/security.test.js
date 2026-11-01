@@ -51,6 +51,83 @@ async function inputs() {
     return { png, pdf: await doc.save() };
 }
 
+test('split extracts requested pages in order and creates ranges or separate pages under a subpath', async t => {
+    const f = await fixture(t, { basePath: '/ClickPDF' });
+    const source = await PDFDocument.create();
+    for (let i = 1; i <= 4; i++) source.addPage([100 * i, 300]);
+    source.getPage(2).setRotation(require('pdf-lib').degrees(90));
+    const field = source.getForm().createTextField('name');
+    field.setText('Example');
+    field.addToPage(source.getPage(0), { x: 10, y: 20, width: 70, height: 20 });
+    const file = ['pdf', await source.save(), 'source.pdf', 'application/pdf'];
+    for (const [mode, pages, expected] of [
+        ['extract', '3, 1-2', [[300, 100, 200]]],
+        ['ranges', '1-2, 4', [[100, 200], [400]]],
+        ['pages', '', [[100], [200], [300], [400]]]
+    ]) {
+        const { response, data } = await f.post('/ClickPDF/api/split', { mode, pages, outputFilename: 'Selected' }, [file]);
+        assert.equal(response.status, 200);
+        assert.equal(data.flattenedForms, true);
+        assert.equal(data.files.length, expected.length);
+        for (const [index, result] of data.files.entries()) {
+            assert.ok(result.downloadUrl.startsWith('/ClickPDF/download/'));
+            const download = await fetch(f.url + result.downloadUrl, { headers: { Cookie: f.cookie() } });
+            assert.equal(download.status, 200);
+            const doc = await PDFDocument.load(await download.arrayBuffer());
+            assert.deepEqual(doc.getPages().map(page => page.getWidth()), expected[index]);
+            assert.equal(doc.getForm().getFields().length, 0);
+            if (mode === 'extract') assert.equal(doc.getPage(0).getRotation().angle, 90);
+            assert.equal((await fetch(f.url + result.downloadUrl)).status, 404);
+        }
+        await f.uploadsEmpty();
+    }
+});
+
+test('split rejects invalid selections and files without retaining uploads or output', async t => {
+    const f = await fixture(t);
+    const { pdf } = await inputs();
+    const file = ['pdf', pdf, 'input.pdf', 'application/pdf'];
+    for (const pages of ['', '0', '3', '2-1', '1,1', '1-2,2', '1,,2', '-1', '1.5', '1e2', '1-999999999999999999999999']) {
+        assert.equal((await f.post('/api/split', { pages }, [file])).response.status, 400);
+    }
+    assert.equal((await f.post('/api/split', { mode: 'unknown', pages: '1' }, [file])).response.status, 400);
+    assert.equal((await f.post('/api/split', { pages: '1' })).response.status, 400);
+    assert.equal((await f.post('/api/split', { pages: '1' }, [file, file])).response.status, 413);
+    assert.equal((await f.post('/api/split', { pages: '1' }, [['pdf', Buffer.from('%PDF-broken'), 'broken.pdf', 'application/pdf']])).response.status, 400);
+    const many = await PDFDocument.create();
+    for (let i = 0; i < 51; i++) many.addPage();
+    assert.equal((await f.post('/api/split', { mode: 'pages' }, [['pdf', await many.save(), 'large.pdf', 'application/pdf']])).response.status, 400);
+    await f.uploadsEmpty();
+    assert.deepEqual(await fs.readdir(path.join(f.root, 'output')), []);
+});
+
+test('failed split rolls back earlier outputs and their download access', async t => {
+    const f = await fixture(t);
+    const save = f.app.get('saveOutput');
+    let savedName;
+    f.app.set('saveOutput', async (...args) => {
+        if (savedName) throw new Error('Simulated disk failure');
+        savedName = await save(...args);
+        return savedName;
+    });
+    const { pdf } = await inputs();
+    const result = await f.post('/api/split', { mode: 'pages' }, [['pdf', pdf, 'sample.pdf', 'application/pdf']]);
+    assert.equal(result.response.status, 400);
+    assert.deepEqual(await fs.readdir(path.join(f.root, 'output')), []);
+    assert.equal((await fetch(f.url + '/download/' + encodeURIComponent(savedName), { headers: { Cookie: f.cookie() } })).status, 404);
+    await f.uploadsEmpty();
+});
+
+test('page-selection parser bounds output counts, page counts and browser/server rules', () => {
+    const { pageGroups } = require('../public/js/pageSelection');
+    assert.deepEqual(pageGroups('extract', '4, 1-2', 4), [[3, 0, 1]]);
+    assert.throws(() => pageGroups('extract', '1', 1001), /1,000/);
+    assert.throws(() => pageGroups('ranges', Array.from({ length: 51 }, (_, i) => i + 1).join(','), 51), /50/);
+    assert.throws(() => pageGroups('extract', '1-2,2-3', 3), /overlap/);
+    assert.throws(() => pageGroups('extract', ' '.repeat(5001), 3));
+    assert.equal(pageGroups('pages', '', 50).length, 50);
+});
+
 test('subpath hosting serves assets and all workflows with scoped, protected downloads', async t => {
     const f = await fixture(t, { basePath: '/ClickPDF' });
     const redirect = await fetch(f.url + '/ClickPDF?test=1', { redirect: 'manual' });
@@ -87,7 +164,7 @@ test('subpath hosting serves assets and all workflows with scoped, protected dow
     }
     assert.equal((await f.post('/ClickPDF/api/merge', {}, [], { Origin: 'https://evil.example' })).response.status, 403);
     assert.equal((await f.post('/ClickPDF/api/merge', {}, [], { 'Sec-Fetch-Site': 'cross-site' })).response.status, 403);
-    assert.equal((await f.post('/ClickPDF/api/split')).response.status, 501);
+    assert.equal((await f.post('/ClickPDF/api/compress')).response.status, 501);
 });
 
 test('invalid deployment prefixes fail before creating storage', () => {
@@ -164,7 +241,7 @@ test('malformed documents, fields and signatures are rejected without retained u
 test('all placeholders return 501 without persisting uploaded documents', async t => {
     const f = await fixture(t);
     const { pdf } = await inputs();
-    for (const route of ['split', 'compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'rotate', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text', 'reorder']) {
+    for (const route of ['compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'rotate', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text', 'reorder']) {
         assert.equal((await f.post('/api/' + route, {}, [['pdf', pdf, 'sample.pdf', 'application/pdf']])).response.status, 501);
     }
     await f.uploadsEmpty();
@@ -206,8 +283,8 @@ test('file, aggregate, field and request-rate limits reject abusive requests and
     assert.equal((await f.post('/api/sign', { signatureData: 'x'.repeat(1024 * 1024 + 1) }, [])).response.status, 413);
     await f.uploadsEmpty();
     const limited = await fixture(t, { rateLimit: 1 });
-    assert.equal((await limited.post('/api/split')).response.status, 501);
-    const rejected = await limited.post('/api/split');
+    assert.equal((await limited.post('/api/compress')).response.status, 501);
+    const rejected = await limited.post('/api/compress');
     assert.equal(rejected.response.status, 429);
     assert.ok(Number(rejected.response.headers.get('retry-after')) > 0);
 });

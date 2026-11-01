@@ -1,5 +1,32 @@
 # ClickPDF API
 
+## Split / extract pages
+
+`POST /api/split` accepts one multipart `pdf` (50 MiB maximum), optional
+`outputFilename` (100 characters maximum), and:
+
+| Field | Meaning |
+| --- | --- |
+| `mode=extract` (default) | Combine selected pages into one PDF, in listed order |
+| `mode=ranges` | One PDF per comma-separated page or ascending range |
+| `mode=pages` | Every source page becomes a separate PDF; `pages` is ignored |
+| `pages` | Required for extract/ranges, e.g. `1-3, 5, 8-10`; positions start at 1 |
+
+Overlapping/duplicate pages, descending ranges and out-of-bounds selections are
+rejected. Limits: 1,000 source pages, 50 output files, 100 MiB combined output.
+Separate-page mode supports at most 50 source pages. Forms are flattened.
+Bookmarks, attachments and digital signature validity are not preserved.
+This is not secure redaction.
+
+Success returns `success`, `message`, `sourcePageCount`, `flattenedForms`, and
+`files`: an array of `{ filename, pageCount, pages, downloadUrl }`. Download
+each URL separately with the same session cookie. No ZIP archive is generated.
+Failed splits remove earlier outputs from the same request. Invalid inputs
+return 400; upload limits return 413. Prefix the endpoint with `/ClickPDF` when
+using `BASE_PATH=/ClickPDF`.
+
+## Common request conventions
+
 When `BASE_PATH=/ClickPDF`, prefix all endpoint paths below with `/ClickPDF` (for example, `/ClickPDF/api/merge`). Returned download URLs include the prefix. Retain the session cookie and use the returned URL unchanged. See [deployment guidance](DEPLOYMENT.md).
 
 Base URL for local use: `http://localhost:3000`. POST endpoints use `multipart/form-data`; let your client set its boundary. File limit: 50 MiB per file. Downloads require the session cookie set by an implemented API request. There is no account/login system. Use trusted inputs and retain cookies between upload and download. Requests from other browser origins are rejected.
@@ -123,6 +150,6 @@ Invalid content, missing input, invalid pages and invalid options return 400 wit
 
 These routes perform no document processing and return 501 for otherwise accepted requests:
 
-`/api/split`, `/api/compress`, `/api/pdf-to-word`, `/api/word-to-pdf`, `/api/pdf-to-ppt`, `/api/ppt-to-pdf`, `/api/pdf-to-excel`, `/api/excel-to-pdf`, `/api/pdf-to-image`, `/api/watermark`, `/api/rotate`, `/api/html-to-pdf`, `/api/unlock`, `/api/protect`, `/api/ocr`, `/api/extract-text`, `/api/reorder`.
+`/api/compress`, `/api/pdf-to-word`, `/api/word-to-pdf`, `/api/pdf-to-ppt`, `/api/ppt-to-pdf`, `/api/pdf-to-excel`, `/api/excel-to-pdf`, `/api/pdf-to-image`, `/api/watermark`, `/api/rotate`, `/api/html-to-pdf`, `/api/unlock`, `/api/protect`, `/api/ocr`, `/api/extract-text`, `/api/reorder`.
 
 The server returns 501 before parsing or saving uploads. Do not use these routes as converters.

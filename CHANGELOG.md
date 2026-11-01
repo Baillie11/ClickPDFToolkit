@@ -4,6 +4,13 @@ This file records changes from the repository presentation update onward. The pa
 
 ## Unreleased
 
+### Split / Extract PDF — 2026-11-01
+
+- Extract a selection into one PDF, split into ranges or save every page separately (up to 50 outputs).
+- Add page-count and output-count previews, shared selection validation, individual protected downloads and rollback on save failure.
+- Preserve page sizes/rotations and flatten forms; reject invalid, encrypted and excessive inputs.
+- Add API regressions and refresh locked Multer, body-parser and qs security patches before deployment.
+
 ### Visual Edit PDF and PDF to Image
 
 - Edit PDF becomes a visual editor: multi-page preview, click-to-place text and check/cross marks, replace existing text lines, highlight, white-out, freehand drawing, drawn/uploaded signatures and images, move/resize and undo/redo.

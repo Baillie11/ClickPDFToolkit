@@ -1,6 +1,6 @@
 # Security review and hosting guidance
 
-Updated 2026-10-12. The initial repository review inspected source commit `d6faa58`; this document now describes the local security fixes layered on that checkout. Four PDF workflows are implemented, including Merge PDFs; the other 17 endpoints still return HTTP 501.
+Updated 2026-10-12. The initial repository review inspected source commit `d6faa58`; this document now describes the local security fixes layered on that checkout. Five server-side PDF workflows are implemented, including Merge and Split / Extract PDF; 16 scaffold endpoints still return HTTP 501. PDF to Image is additionally available in the browser. Split/extract and dependency patches were verified on 2026-11-01.
 
 ## Verification
 

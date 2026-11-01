@@ -28,11 +28,11 @@
                         <p>Combine multiple PDFs into one</p>
                         <span class="status available">Available</span>
                     </div>
-                    <div class="tool-card" data-tool="split">
+                    <div class="tool-card active" data-tool="split" role="button" tabindex="0">
                         <div class="tool-icon">✂️</div>
                         <h3>Split PDF</h3>
-                        <p>Split PDF into separate pages</p>
-                        <span class="status coming-soon">Coming Soon</span>
+                        <p>Extract pages or split into separate PDFs</p>
+                        <span class="status available">Available</span>
                     </div>
                     <div class="tool-card" data-tool="reorder">
                         <div class="tool-icon">🔄</div>
@@ -219,6 +219,46 @@
                 </div>
             </div>
             
+            <div id="split-tool" class="tool-workspace hidden">
+                <h2>✂️ Split / Extract PDF</h2>
+                <p>Keep the pages you need, or divide a document into separate PDFs.</p>
+                <form id="split-form">
+                    <fieldset id="split-controls" class="merge-controls">
+                        <legend class="sr-only">Choose a PDF and pages</legend>
+                        <div id="split-upload-area" class="upload-area">
+                            <label for="split-input">Drop one PDF here or choose a file</label>
+                            <input id="split-input" type="file" accept="application/pdf,.pdf" aria-describedby="split-limits">
+                            <p id="split-limits" class="hint">50 MiB input · 1,000 source pages · 50 output files · 100 MiB combined output</p>
+                        </div>
+                        <p id="split-summary" role="status">Choose a PDF to get started.</p>
+                        <div class="options-panel">
+                            <label for="split-mode">How would you like to split?</label>
+                            <select id="split-mode">
+                                <option value="extract">Extract selected pages into one PDF</option>
+                                <option value="ranges">One PDF per range or page listed</option>
+                                <option value="pages">Every page as a separate PDF (up to 50)</option>
+                            </select>
+                            <label for="split-pages">Pages and ranges</label>
+                            <input id="split-pages" type="text" maxlength="5000" placeholder="e.g. 1-3, 5, 8-10" aria-describedby="split-help">
+                            <p id="split-help" class="hint">Use printed page positions starting at 1. Commas separate ranges; your listed order is preserved. No overlapping or descending ranges.</p>
+                            <p id="split-plan" role="status"></p>
+                            <label for="split-name">Output filename prefix</label>
+                            <input id="split-name" type="text" maxlength="100" value="split-document">
+                            <p class="hint">Form fields become non-editable. Bookmarks, attachments and digital signature validity are not preserved. This tool is not secure redaction.</p>
+                        </div>
+                        <button id="split-btn" class="convert-btn" type="submit" disabled>Create PDFs</button>
+                        <button id="split-clear" class="back-btn" type="button">Clear</button>
+                    </fieldset>
+                </form>
+                <p id="split-error" class="error-message hidden" role="alert"></p>
+                <div id="split-result" class="result hidden">
+                    <h3>Your PDFs are ready</h3>
+                    <p id="split-result-message" role="status"></p>
+                    <ol id="split-downloads" class="merge-file-list"></ol>
+                    <p class="hint">Download each file separately in this browser within one hour. No ZIP archive is created.</p>
+                </div>
+            </div>
+
             <!-- Image to PDF Tool -->
             <div id="image-to-pdf-tool" class="tool-workspace">
                 <h2>🖼️ Image to PDF</h2>
@@ -659,6 +699,8 @@
         </div>
     </footer>
 
+    <script src="js/pageSelection.js"></script>
+    <script src="js/split.js"></script>
     <script src="js/merge.js"></script>
     <script src="js/app.js"></script>
 </body>
