@@ -6,13 +6,13 @@
 [![Node.js](https://img.shields.io/badge/runtime-Node.js-339933.svg)](package.json)
 [![JavaScript](https://img.shields.io/badge/language-JavaScript-F7DF1E.svg)](public/js/app.js)
 
-[Quick start](#quick-start) · [Features](#features) · [API](docs/API.md) · [Contribute](CONTRIBUTING.md) · [Issues](https://github.com/Baillie11/ClickPDFToolkit/issues)
+[Quick start](#quick-start) · [Features](#features) · [API](docs/API.md) · [Contribute](CONTRIBUTING.md) · [Issues](https://github.com/Baillie11/clickpdfToolkit/issues)
 
 ## Screenshot / demo
 
 ![Split and extract PDF pages with a completed download](docs/screenshots/live-split-extract.png)
 
-Actual deployed application screenshot using a synthetic four-page document. **[Try ClickPDF online](https://clickecommerce.com.au/ClickPDF/)** or run it yourself. See the [deployment verification](docs/DEPLOYMENT.md#ventraip-deployment-status--2026-11-01).
+Actual deployed application screenshot using a synthetic four-page document. **[Try ClickPDF online](https://clickecommerce.com.au/clickpdf/)** or run it yourself. See the [deployment verification](docs/DEPLOYMENT.md#ventraip-deployment-status--2026-11-01).
 
 **Additional screenshots welcome:** home screen; image upload with previews; conversion settings; completed conversion and download button; editor and signature workflows. Use synthetic documents and non-sensitive filenames. See the [asset checklist](docs/PROJECT_REVIEW.md#screenshots-to-provide).
 
@@ -60,7 +60,7 @@ All 16 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon”
 Requirements: Git, npm and a Node.js runtime compatible with the locked dependencies. Node.js **20.19+** is required; use a supported LTS release (22 or newer). Node.js 20.20.2 was used for local verification. Installation needs network access for packages and sharp's platform dependencies.
 
 ```bash
-git clone https://github.com/Baillie11/ClickPDFToolkit.git
+git clone https://github.com/Baillie11/clickpdfToolkit.git
 cd ClickPDFToolkit
 npm ci
 ```
@@ -83,7 +83,7 @@ There is no build step. The server creates `uploads/` and `output/` and needs wr
 
 For **Split / Extract PDF**, upload one PDF and choose a mode. Enter page positions such as `1-3, 5, 8-10`. Extraction creates one file; range mode creates one file per comma-separated entry. Separate-page mode supports at most 50 pages. Selections cannot overlap. Download each result individually in the same browser session.
 
-For installation under a URL path such as `/ClickPDF/`, set `BASE_PATH=/ClickPDF` and follow the [deployment guide](docs/DEPLOYMENT.md). Assets, API calls, download links and session cookies support this prefix. The VentraIP deployment has been verified with synthetic documents.
+For installation under a URL path such as `/clickpdf/`, set `BASE_PATH=/clickpdf` and follow the [deployment guide](docs/DEPLOYMENT.md). Assets, API calls, download links and session cookies support this prefix. The VentraIP deployment has been verified with synthetic documents.
 
 1. Select **Split / Extract PDF**, **Merge PDFs**, **Image to PDF**, **Edit PDF**, **Sign PDF** or **PDF to Image**.
 2. Browse or drop input files into the upload area.
@@ -157,7 +157,7 @@ Documentation, reproducible bugs, accessibility improvements and focused impleme
 
 ## Bugs, feature requests and security
 
-[Open an issue](https://github.com/Baillie11/ClickPDFToolkit/issues) with reproduction steps, expected/actual results and runtime details. Describe the document task for feature requests. Use synthetic samples; never attach private documents, signatures or credentials. Follow [SECURITY.md](SECURITY.md) for security reporting.
+[Open an issue](https://github.com/Baillie11/clickpdfToolkit/issues) with reproduction steps, expected/actual results and runtime details. Describe the document task for feature requests. Use synthetic samples; never attach private documents, signatures or credentials. Follow [SECURITY.md](SECURITY.md) for security reporting.
 
 ## Licence
 
@@ -165,6 +165,6 @@ Documentation, reproducible bugs, accessibility improvements and focused impleme
 
 ## Support the project
 
-[Source](https://github.com/Baillie11/ClickPDFToolkit) · [Issues](https://github.com/Baillie11/ClickPDFToolkit/issues) · [Change log](CHANGELOG.md)
+[Source](https://github.com/Baillie11/clickpdfToolkit) · [Issues](https://github.com/Baillie11/clickpdfToolkit/issues) · [Change log](CHANGELOG.md)
 
 If you find ClickPDF useful, please consider giving the repository a ⭐. It helps others discover the project.

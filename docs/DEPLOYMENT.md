@@ -1,20 +1,19 @@
 # Hosting ClickPDF under a URL path
 
-ClickPDF supports a dedicated site root or a path such as `/ClickPDF/`.
-The application is live at **https://clickecommerce.com.au/ClickPDF/**.
+ClickPDF supports a dedicated site root or a path such as `/clickpdf/`.
+The application is live at **https://clickecommerce.com.au/clickpdf/**.
 
-The site-root `.htaccess` redirects case variants of the entry URL (such as
-`/clickpdf`, `/clickpdf/` and `/CLICKPDF`) to `/ClickPDF/` with HTTP 308. This
-rule precedes WordPress routing, and the prior host configuration is backed
-up outside the public document root. Application asset/API paths retain their
-original casing. For equivalent Apache/LiteSpeed deployments, place this
-small block before the existing WordPress rules; do not replace those rules:
+The lowercase `/clickpdf/` path is the canonical application mount, including
+API URLs, download links and the session-cookie path. The old `/ClickPDF/`
+entry and its subpaths redirect to lowercase with HTTP 308. The site-root
+`.htaccess` block precedes WordPress routing; the prior host configuration is
+backed up outside the public document root. Keep all existing WordPress rules:
 
 ```apache
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteCond %{REQUEST_URI} !^/ClickPDF/$
-RewriteRule ^clickpdf/?$ https://clickecommerce.com.au/ClickPDF/ [R=308,L,NC]
+RewriteCond %{REQUEST_URI} !^/clickpdf/
+RewriteRule ^clickpdf(?:/(.*))?$ https://clickecommerce.com.au/clickpdf/$1 [R=308,L,NC]
 </IfModule>
 ```
 
@@ -34,7 +33,7 @@ it does not depend on the host's unavailable AVIF/HEIF ImageMagick codecs.
 All **25 automated tests passed on the host**. Live HTTPS checks verified
 image-to-PDF with PNG/JPEG/GIF/WebP/TIFF/AVIF, merge, split/extract, edit with
 image overlays, visual signatures, session-protected downloads, cross-origin
-rejection, assets and the `/ClickPDF` trailing-slash redirect. The live browser
+rejection, assets and the `/clickpdf` trailing-slash redirect. The live browser
 also rendered a synthetic four-page PDF into four PNG downloads. These checks
 cover representative documents, not every possible PDF or browser.
 
@@ -71,7 +70,7 @@ HOST=127.0.0.1
 PORT=3000
 ALLOWED_HOSTS=clickecommerce.com.au
 PUBLIC_ORIGIN=https://clickecommerce.com.au
-BASE_PATH=/ClickPDF
+BASE_PATH=/clickpdf
 IMAGE_BACKEND=imagemagick
 IMAGEMAGICK_BINARY=/bin/convert
 UV_THREADPOOL_SIZE=1
@@ -83,11 +82,11 @@ Adjust host and port for the platform. `.env` files are not loaded automatically
 trailing slash; leave it empty for a dedicated site root.
 
 The HTTPS proxy must preserve the original Host header and forward the full
-request path, including `/ClickPDF`, to Node.js. A proxy that strips the prefix
+request path, including `/clickpdf`, to Node.js. A proxy that strips the prefix
 needs a different mapping; do not deploy that configuration untested. Requests
-to `/ClickPDF` redirect to `/ClickPDF/` so relative frontend URLs resolve
+to `/clickpdf` redirect to `/clickpdf/` so relative frontend URLs resolve
 correctly. APIs and downloads use the same prefix; the session cookie is
-scoped to `/ClickPDF/`.
+scoped to `/clickpdf/`.
 
 On cPanel/CloudLinux, first confirm that the correct domain's account has a
 supported Node.js runtime and application manager. Static file upload alone
@@ -107,9 +106,9 @@ documented 100 MiB combined upload limit in mind. Never publish `uploads/` or
 
 ## Deployment verification
 
-- Confirm the existing website works and `/ClickPDF` redirects correctly.
-- Verify the home page, stylesheet and both scripts under `/ClickPDF/`.
-- Open Edit PDF and PDF to Image with a synthetic PDF. Confirm `/ClickPDF/vendor/pdfjs/pdf.worker.min.js` loads and the browser console shows no Content-Security-Policy errors (pdf.js is bundled; no CDN is used).
+- Confirm the existing website works and `/clickpdf` redirects correctly.
+- Verify the home page, stylesheet and both scripts under `/clickpdf/`.
+- Open Edit PDF and PDF to Image with a synthetic PDF. Confirm `/clickpdf/vendor/pdfjs/pdf.worker.min.js` loads and the browser console shows no Content-Security-Policy errors (pdf.js is bundled; no CDN is used).
 - Use synthetic documents to exercise merge, image conversion, edit and sign.
 - Inspect each output; verify a separate session cannot download it.
 - Check cross-origin requests are rejected and uploaded inputs are removed.

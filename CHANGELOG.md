@@ -14,7 +14,7 @@ This file records changes from the repository presentation update onward. The pa
 
 ### VentraIP compatibility and deployment — 2026-11-01
 
-- Deploy at https://clickecommerce.com.au/ClickPDF/ on the existing hosting service.
+- Deploy at https://clickecommerce.com.au/clickpdf/ on the existing hosting service.
 - Add an explicit ImageMagick backend plus portable AVIF/HEIF workers; preserve all existing PDF tools and Sharp as the default backend.
 - Bound image processing time, input/output, dimensions and memory; restrict ImageMagick coders and delegates.
 - Verify 25 automated tests locally and on the host, five server workflows over HTTPS, and browser PDF-to-Image.
@@ -32,7 +32,7 @@ This file records changes from the repository presentation update onward. The pa
 ### Subpath hosting preparation
 
 - Add optional `BASE_PATH` configuration, relative browser asset/API URLs, prefixed download links and scoped session cookies.
-- Test all four workflows and access controls under `/ClickPDF/` as well as the existing root installation.
+- Test all four workflows and access controls under `/clickpdf/` as well as the existing root installation.
 - Add deployment guidance covering runtime support, private storage, proxy path handling and live verification. No hosted deployment is claimed.
 
 ### Added — 2026-10-12
