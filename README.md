@@ -10,9 +10,11 @@
 
 ## Screenshot / demo
 
-No screenshots or hosted demo are included yet. Run locally to try the real application.
+![Split and extract PDF pages with a completed download](docs/screenshots/split-extract.png)
 
-**Screenshots requested, not yet available:** home screen; image upload with previews; conversion settings; completed conversion and download button; editor and signature workflows. Use synthetic documents and non-sensitive filenames. See the [asset checklist](docs/PROJECT_REVIEW.md#screenshots-to-provide).
+Actual local application screenshot using a synthetic four-page document. A hosted demo is not yet available: see the [verified hosting blocker](docs/DEPLOYMENT.md#ventraip-deployment-status--2026-11-01). Run locally to try the application.
+
+**Additional screenshots welcome:** home screen; image upload with previews; conversion settings; completed conversion and download button; editor and signature workflows. Use synthetic documents and non-sensitive filenames. See the [asset checklist](docs/PROJECT_REVIEW.md#screenshots-to-provide).
 
 ## Why ClickPDF?
 
@@ -83,7 +85,7 @@ For **Split / Extract PDF**, upload one PDF and choose a mode. Enter page positi
 
 For installation under a URL path such as `/ClickPDF/`, set `BASE_PATH=/ClickPDF` and follow the [deployment guide](docs/DEPLOYMENT.md). Assets, API calls, download links and session cookies support this prefix. Live deployment still needs to be verified.
 
-1. Select **Merge PDFs**, **Image to PDF**, **Edit PDF** or **Sign PDF**.
+1. Select **Split / Extract PDF**, **Merge PDFs**, **Image to PDF**, **Edit PDF**, **Sign PDF** or **PDF to Image**.
 2. Browse or drop input files into the upload area.
 3. Choose page settings, overlay content, or a drawn/uploaded signature and target page.
 4. Run the operation and download the result.
@@ -98,6 +100,7 @@ Margins use PDF points; zero margin and zero coordinates are supported. Numeric 
 
 | Endpoint | Multipart input |
 | --- | --- |
+| `POST /api/split` | One `pdf`, `mode` (`extract`, `ranges`, `pages`), `pages` selection and optional `outputFilename` |
 | `POST /api/merge` | Repeated `pdfs` files in merge order, optional `outputFilename` |
 | `POST /api/image-to-pdf` | Repeated `images` files and page options |
 | `POST /api/edit` | `pdf`; either simple text/overlay fields or the editor's JSON fields (`annotations`, `signatures`, `rectangles`, `drawStrokes`, `textEdits`) |
@@ -142,7 +145,7 @@ Suggested priorities, with no promised release dates:
 - [x] Validate coordinates, margins and other numeric options.
 - [ ] Improve error feedback and format compatibility.
 - [x] Add workflow and security regression tests (`npm test`).
-- [ ] Add real screenshots.
+- [x] Add a real split/extract workflow screenshot; additional tool screenshots welcome.
 - [x] Implement Merge PDFs with document ordering and form flattening.
 - [x] Implement split/extract pages, range outputs and separate-page outputs.
 - [ ] Implement rotate and a dedicated page reorder interface.
