@@ -3,6 +3,33 @@
 ClickPDF supports a dedicated site root or a path such as `/ClickPDF/`.
 No hosted demo has been verified yet; these instructions prepare deployment.
 
+## VentraIP deployment status — 2026-11-01
+
+The release containing Split / Extract PDF was uploaded to the existing private
+application directory, but public routing has **not** been enabled. The existing
+WordPress site remains separate. Node.js 24.22.2 is available on the host.
+
+The host exposes an older x86 CPU without the instructions needed by Sharp's
+Linux x64 binary. Loading Sharp fails with `Unsupported CPU: Prebuilt binaries
+for Linux x64 require v2 microarchitecture`. The official Sharp WebAssembly
+fallback was tried and also failed: `Wasm SIMD unsupported`. A native source
+build is not available in this account: executing GCC is denied and GLib/GObject
+development packages are unavailable. No PDF functionality was disabled and
+no image-processing dependency was downgraded to work around this.
+
+Ask VentraIP to move this hosting service to a server exposing x86-64-v2 CPU
+features (including SSE4.2), or provide a supported native Sharp/libvips build.
+Reference: [Sharp installation requirements](https://sharp.pixelplumbing.com/install/).
+After that change, reinstall the locked dependencies, run the workflow tests,
+and register the `/ClickPDF` application using `passenger.cjs` as its startup
+file. Recheck the full-path proxy behavior and single-process requirement below.
+
+The 22 local automated tests passed, including split extraction/order,
+range and separate-page outputs, form flattening, download ownership,
+invalid input rejection and rollback. All three split modes were also exercised
+through the local browser interface. These results do not constitute live-host
+verification.
+
 ## Runtime and storage
 
 Use a supported Node.js LTS release compatible with `package.json` (22 or 24).

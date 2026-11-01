@@ -10,6 +10,7 @@ This file records changes from the repository presentation update onward. The pa
 - Add page-count and output-count previews, shared selection validation, individual protected downloads and rollback on save failure.
 - Preserve page sizes/rotations and flatten forms; reject invalid, encrypted and excessive inputs.
 - Add API regressions and refresh locked Multer, body-parser and qs security patches before deployment.
+- Verified all three split modes in the browser and all 22 local automated tests. Uploaded to VentraIP; live deployment is blocked by the host CPU's Sharp incompatibility (see deployment guide).
 
 ### Visual Edit PDF and PDF to Image
 
