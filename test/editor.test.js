@@ -5,7 +5,6 @@ const os = require('node:os');
 const path = require('node:path');
 const { once } = require('node:events');
 const { PDFDocument } = require('pdf-lib');
-const sharp = require('sharp');
 const { createApp } = require('../server');
 
 async function fixture(t, options = {}) {
@@ -46,7 +45,7 @@ async function fixture(t, options = {}) {
 }
 
 async function inputs() {
-    const png = await sharp({ create: { width: 120, height: 80, channels: 4, background: '#2563eb' } }).png().toBuffer();
+    const png = await fs.readFile(path.join(__dirname, 'fixtures/sample.png'));
     const doc = await PDFDocument.create();
     doc.addPage([595, 842]);
     doc.addPage([300, 400]);

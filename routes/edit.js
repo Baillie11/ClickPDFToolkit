@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { PDFDocument, rgb, StandardFonts, LineCapStyle } = require('pdf-lib');
 const fs = require('fs').promises;
-const sharp = require('sharp');
-const { number, IMAGE_OPTIONS, validateImage } = require('../lib/security');
+const images = require('../lib/images');
+const { number, validateImage } = require('../lib/security');
 
 // Bounds keep a single request from consuming unbounded CPU or memory. The upload layer already
 // limits each multipart field to 1 MiB and requires every field to be a string.
@@ -69,7 +69,7 @@ async function embedDataUrl(pdfDoc, cache, dataUrl) {
     if (cache.has(dataUrl)) return cache.get(dataUrl);
     const buffer = Buffer.from(dataUrl.slice(dataUrl.indexOf(',') + 1), 'base64');
     await validateImage(buffer);
-    const embedded = await pdfDoc.embedPng(await sharp(buffer, IMAGE_OPTIONS).png().toBuffer());
+    const embedded = await pdfDoc.embedPng(await images.toPng(buffer));
     cache.set(dataUrl, embedded);
     return embedded;
 }
@@ -254,7 +254,7 @@ router.post('/', async (req, res) => {
                 } else if (imageFile.mimetype === 'image/jpeg' || imageFile.mimetype === 'image/jpg') {
                     image = await pdfDoc.embedJpg(imageBytes);
                 } else {
-                    image = await pdfDoc.embedPng(await sharp(imageBytes, IMAGE_OPTIONS).png().toBuffer());
+                    image = await pdfDoc.embedPng(await images.toPng(imageBytes));
                 }
 
                 const page = pages[pageNumber - 1];

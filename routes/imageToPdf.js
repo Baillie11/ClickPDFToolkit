@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { PDFDocument } = require('pdf-lib');
-const sharp = require('sharp');
+const images = require('../lib/images');
 const fs = require('fs').promises;
-const { number, IMAGE_OPTIONS } = require('../lib/security');
+const { number } = require('../lib/security');
 
 router.post('/', async (req, res) => {
     const upload = req.app.get('upload');
@@ -47,13 +47,11 @@ router.post('/', async (req, res) => {
 
             for (const file of req.files) {
                 try {
-                    // Read and process image with sharp
+                    // Read and process the image with the configured backend
                     const imageBuffer = await fs.readFile(file.path);
 
                     // Convert to PNG for consistency (pdf-lib works well with PNG)
-                    const processedBuffer = await sharp(imageBuffer, IMAGE_OPTIONS)
-                        .png()
-                        .toBuffer();
+                    const processedBuffer = await images.toPng(imageBuffer);
 
                     // Embed image in PDF
                     const image = await pdfDoc.embedPng(processedBuffer);

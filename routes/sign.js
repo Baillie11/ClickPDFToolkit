@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { PDFDocument } = require('pdf-lib');
 const fs = require('fs').promises;
-const { number, IMAGE_OPTIONS } = require('../lib/security');
-const sharp = require('sharp');
+const { number } = require('../lib/security');
+const images = require('../lib/images');
 
 router.post('/', async (req, res) => {
     const upload = req.app.get('upload');
@@ -46,9 +46,7 @@ router.post('/', async (req, res) => {
                 const signatureBuffer = Buffer.from(base64Data, 'base64');
                 
                 // Convert to PNG with transparency preserved
-                const pngBuffer = await sharp(signatureBuffer, IMAGE_OPTIONS)
-                    .png()
-                    .toBuffer();
+                const pngBuffer = await images.toPng(signatureBuffer);
                 
                 signatureImage = await pdfDoc.embedPng(pngBuffer);
             }
@@ -58,7 +56,7 @@ router.post('/', async (req, res) => {
                 const sigBytes = await fs.readFile(sigFile.path);
                 
                 // Convert to PNG for consistency
-                const pngBuffer = await sharp(sigBytes, IMAGE_OPTIONS).png().toBuffer();
+                const pngBuffer = await images.toPng(sigBytes);
                 signatureImage = await pdfDoc.embedPng(pngBuffer);
                 
                 await fs.unlink(sigFile.path);

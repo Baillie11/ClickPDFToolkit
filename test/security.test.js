@@ -8,7 +8,6 @@ const net = require('node:net');
 const vm = require('node:vm');
 const { once } = require('node:events');
 const { PDFDocument } = require('pdf-lib');
-const sharp = require('sharp');
 const { createApp } = require('../server');
 
 async function fixture(t, options = {}) {
@@ -45,7 +44,7 @@ async function fixture(t, options = {}) {
 }
 
 async function inputs() {
-    const png = await sharp({ create: { width: 120, height: 80, channels: 4, background: '#2563eb' } }).png().toBuffer();
+    const png = await fs.readFile(path.join(__dirname, 'fixtures/sample.png'));
     const doc = await PDFDocument.create();
     doc.addPage([595, 842]); doc.addPage([595, 842]);
     return { png, pdf: await doc.save() };
@@ -177,11 +176,11 @@ test('all existing workflows generate PDFs; downloads require the creating sessi
     const f = await fixture(t);
     const { png, pdf } = await inputs();
     let firstCookie;
-    const images = [['png', png], ['jpeg', await sharp(png).jpeg().toBuffer()], ['gif', await sharp(png).gif().toBuffer()], ['webp', await sharp(png).webp().toBuffer()]];
+    const images = await Promise.all(['png', 'jpeg', 'gif', 'webp', 'tiff', 'avif'].map(async format => [format, await fs.readFile(path.join(__dirname, `fixtures/sample.${format}`))]));
     for (const fitMode of ['fit', 'fill', 'stretch']) {
         const { response, data } = await f.post('/api/image-to-pdf', { fitMode, margin: '0', pageSize: 'Letter', orientation: 'landscape', outputFilename: 'safe name' }, images.map(([format, bytes]) => ['images', bytes, `sample.${format}`, `image/${format}`]));
         assert.equal(response.status, 200);
-        assert.equal(data.pageCount, 4);
+        assert.equal(data.pageCount, images.length);
         assert.match(response.headers.get('set-cookie') || f.cookie(), /clickpdf_session=/);
         firstCookie = f.cookie();
         const result = await fetch(f.url + data.downloadUrl, { headers: { Cookie: f.cookie() } });
@@ -189,7 +188,7 @@ test('all existing workflows generate PDFs; downloads require the creating sessi
         assert.match(result.headers.get('content-disposition'), /^attachment/);
         assert.equal(result.headers.get('cache-control'), 'no-store');
         const generated = await PDFDocument.load(await result.arrayBuffer());
-        assert.equal(generated.getPageCount(), 4);
+        assert.equal(generated.getPageCount(), images.length);
         assert.equal(generated.getPage(0).getWidth(), 792);
         assert.equal((await fetch(f.url + data.downloadUrl)).status, 404);
         assert.equal((await fetch(f.url + data.downloadUrl, { headers: { Cookie: 'clickpdf_session=' + '0'.repeat(64) } })).status, 404);

@@ -9,12 +9,14 @@
     "test": "node --test"
   },
   "dependencies": {
+    "@jsquash/avif": "2.1.1",
     "express": "^4.22.3",
+    "libheif-js": "1.23.5",
     "multer": "^2.4.0",
     "pdf-lib": "^1.17.1",
+    "pngjs": "7.0.0",
     "sharp": "^0.35.5"
   },
-  "devDependencies": {},
   "license": "MIT",
   "repository": {
     "type": "git",
