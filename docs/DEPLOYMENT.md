@@ -12,10 +12,28 @@ backed up outside the public document root. Keep all existing WordPress rules:
 ```apache
 <IfModule mod_rewrite.c>
 RewriteEngine On
+RewriteRule ^clickpdf(?:/.*)?$ - [E=Cache-Control:no-cache,NC]
 RewriteCond %{REQUEST_URI} !^/clickpdf/
 RewriteRule ^clickpdf(?:/(.*))?$ https://clickecommerce.com.au/clickpdf/$1 [R=308,L,NC]
 </IfModule>
 ```
+
+The managed `/clickpdf/.htaccess` also excludes this application from inherited
+LiteSpeed page caching. A cached WordPress 404 previously persisted at the
+slashless URL despite a targeted cache purge. Preserve this custom block when
+the hosting manager regenerates its own directives:
+
+```apache
+<IfModule LiteSpeed>
+CacheDisable public /
+CacheDisable private /
+RewriteEngine On
+RewriteRule .* - [E=Cache-Control:no-cache]
+</IfModule>
+```
+
+This block is scoped to the application's directory; WordPress page caching
+remains enabled on the rest of the website.
 
 ## VentraIP deployment status — 2026-11-01
 
