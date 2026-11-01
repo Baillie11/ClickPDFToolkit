@@ -3,6 +3,21 @@
 ClickPDF supports a dedicated site root or a path such as `/ClickPDF/`.
 The application is live at **https://clickecommerce.com.au/ClickPDF/**.
 
+The site-root `.htaccess` redirects case variants of the entry URL (such as
+`/clickpdf`, `/clickpdf/` and `/CLICKPDF`) to `/ClickPDF/` with HTTP 308. This
+rule precedes WordPress routing, and the prior host configuration is backed
+up outside the public document root. Application asset/API paths retain their
+original casing. For equivalent Apache/LiteSpeed deployments, place this
+small block before the existing WordPress rules; do not replace those rules:
+
+```apache
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/ClickPDF/$
+RewriteRule ^clickpdf/?$ https://clickecommerce.com.au/ClickPDF/ [R=308,L,NC]
+</IfModule>
+```
+
 ## VentraIP deployment status — 2026-11-01
 
 The existing VentraIP service runs ClickPDF through CloudLinux/LiteSpeed with
