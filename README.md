@@ -10,9 +10,9 @@
 
 ## Screenshot / demo
 
-![Split and extract PDF pages with a completed download](docs/screenshots/split-extract.png)
+![Split and extract PDF pages with a completed download](docs/screenshots/live-split-extract.png)
 
-Actual local application screenshot using a synthetic four-page document. A hosted demo is not yet available: see the [verified hosting blocker](docs/DEPLOYMENT.md#ventraip-deployment-status--2026-11-01). Run locally to try the application.
+Actual deployed application screenshot using a synthetic four-page document. **[Try ClickPDF online](https://clickecommerce.com.au/ClickPDF/)** or run it yourself. See the [deployment verification](docs/DEPLOYMENT.md#ventraip-deployment-status--2026-11-01).
 
 **Additional screenshots welcome:** home screen; image upload with previews; conversion settings; completed conversion and download button; editor and signature workflows. Use synthetic documents and non-sensitive filenames. See the [asset checklist](docs/PROJECT_REVIEW.md#screenshots-to-provide).
 
@@ -34,12 +34,12 @@ This early-stage free PDF toolkit currently has five server-side workflows plus 
 | --- | --- | --- |
 | Split / Extract PDF | Extract selected pages into one PDF, split into ranges, or save every page separately; preserve listed order, page sizes and rotations | 50 MiB input, 1,000 source pages, 50 output files, 100 MiB combined output. Individual downloads, no ZIP. Form fields are flattened. Bookmarks, attachments and digital signature validity are not preserved. Not secure redaction. |
 | Merge PDFs | Combine 2–50 PDFs in a chosen order; reorder/remove files, custom output name, preserve page sizes and rotations | 50 MiB per file, 100 MiB total, 1,000 pages. Encrypted or unreadable PDFs are rejected. Form fields are flattened; bookmarks, attachments and digital signature validity are not preserved. |
-| Image to PDF | One page per successfully processed image; A4, Letter, Legal, A3, A5; portrait/landscape; fit, fill, stretch; custom output name | Up to 50 files, 50 MiB per file, 100 MiB total; image dimension limits apply. PNG, JPEG, GIF and WebP verified. BMP is accepted by the interface but processor support is unverified. Animated GIFs are not converted frame by frame. |
+| Image to PDF | One page per successfully processed image; A4, Letter, Legal, A3, A5; portrait/landscape; fit, fill, stretch; custom output name | Up to 50 files, 50 MiB per file, 100 MiB total; image dimension limits apply. PNG, JPEG, GIF, WebP, TIFF and AVIF verified. BMP is offered by the interface but rejected by server validation. Animated GIFs are not converted frame by frame. |
 | Edit PDF | Visual editor with a multi-page preview: click-to-place text, check/cross marks, replace existing text lines, highlight, white-out, freehand drawing, drawn or uploaded signatures and images; move/resize, undo/redo | Adds content on top of pages. White-out and text replacement only cover the original, which stays in the file (this is not redaction). No annotation objects. Standard-font encoding limits apply; unsupported characters become `?`. Up to 1 MiB of editor data per request (images are downscaled in the browser). |
 | Sign PDF | Draw a signature or upload an image, then place it on a selected page | Visual signature image only. No certificate-based digital signing or signature validation. Drawn signatures have a white background. |
 | PDF to Image | Render every page (or just the first) to PNG or JPEG at 1×–3× scale, entirely in the browser | Nothing is uploaded. Large documents depend on browser memory. `/api/pdf-to-image` remains an unimplemented scaffold; the interface does not use it. |
 
-Representative API workflows were verified with synthetic documents on Node.js 20.20.2, and downloaded PDFs were parsed with pdf-lib. This does not establish compatibility with every browser, format or document.
+Representative API workflows were verified with synthetic documents locally on Node.js 20.20.2 and on VentraIP with Node.js 24.22.2, and downloaded PDFs were parsed with pdf-lib. This does not establish compatibility with every browser, format or document.
 
 ### Partial, scaffold and planned features
 
@@ -83,7 +83,7 @@ There is no build step. The server creates `uploads/` and `output/` and needs wr
 
 For **Split / Extract PDF**, upload one PDF and choose a mode. Enter page positions such as `1-3, 5, 8-10`. Extraction creates one file; range mode creates one file per comma-separated entry. Separate-page mode supports at most 50 pages. Selections cannot overlap. Download each result individually in the same browser session.
 
-For installation under a URL path such as `/ClickPDF/`, set `BASE_PATH=/ClickPDF` and follow the [deployment guide](docs/DEPLOYMENT.md). Assets, API calls, download links and session cookies support this prefix. Live deployment still needs to be verified.
+For installation under a URL path such as `/ClickPDF/`, set `BASE_PATH=/ClickPDF` and follow the [deployment guide](docs/DEPLOYMENT.md). Assets, API calls, download links and session cookies support this prefix. The VentraIP deployment has been verified with synthetic documents.
 
 1. Select **Split / Extract PDF**, **Merge PDFs**, **Image to PDF**, **Edit PDF**, **Sign PDF** or **PDF to Image**.
 2. Browse or drop input files into the upload area.
@@ -111,7 +111,7 @@ Margins use PDF points; zero margin and zero coordinates are supported. Numeric 
 
 ## Technology stack
 
-Node.js · Express · pdf-lib · sharp · multer · vanilla JavaScript · HTML · CSS, plus [pdf.js](https://github.com/mozilla/pdf.js) 3.11.174 (Apache-2.0, bundled in `public/vendor/pdfjs`) for in-browser preview and rendering. Built-in Node.js crypto generates IDs and watch mode provides development restarts. No database, account system or frontend framework is implemented.
+Node.js · Express · pdf-lib · sharp (or the [compatible image backend](docs/IMAGE_BACKENDS.md)) · multer · vanilla JavaScript · HTML · CSS, plus [pdf.js](https://github.com/mozilla/pdf.js) 3.11.174 (Apache-2.0, bundled in `public/vendor/pdfjs`) for in-browser preview and rendering. Built-in Node.js crypto generates IDs and watch mode provides development restarts. No database, account system or frontend framework is implemented.
 
 ## Privacy and self-hosting
 

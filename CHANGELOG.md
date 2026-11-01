@@ -10,7 +10,15 @@ This file records changes from the repository presentation update onward. The pa
 - Add page-count and output-count previews, shared selection validation, individual protected downloads and rollback on save failure.
 - Preserve page sizes/rotations and flatten forms; reject invalid, encrypted and excessive inputs.
 - Add API regressions and refresh locked Multer, body-parser and qs security patches before deployment.
-- Verified all three split modes in the browser and all 22 local automated tests. Uploaded to VentraIP; live deployment is blocked by the host CPU's Sharp incompatibility (see deployment guide).
+- Verified all three split modes in the browser and all 22 local automated tests. Uploaded to VentraIP; the initial CPU blocker was subsequently resolved by the compatible image backend below.
+
+### VentraIP compatibility and deployment — 2026-11-01
+
+- Deploy at https://clickecommerce.com.au/ClickPDF/ on the existing hosting service.
+- Add an explicit ImageMagick backend plus portable AVIF/HEIF workers; preserve all existing PDF tools and Sharp as the default backend.
+- Bound image processing time, input/output, dimensions and memory; restrict ImageMagick coders and delegates.
+- Verify 25 automated tests locally and on the host, five server workflows over HTTPS, and browser PDF-to-Image.
+- Add synthetic image fixtures and checks for colour, transparency and first-frame handling. Document backend maintenance and third-party licences.
 
 ### Visual Edit PDF and PDF to Image
 

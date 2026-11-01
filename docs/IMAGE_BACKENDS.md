@@ -4,20 +4,17 @@ The default backend is Sharp. On a host whose CPU cannot load Sharp, explicitly
 set `IMAGE_BACKEND=imagemagick` and `IMAGEMAGICK_BINARY=/bin/convert` (adjust the
 absolute executable path for your host). No PDF tools are disabled by this choice.
 
-LiteSpeed runs apps through `lsnode`, which is not a general Node.js CLI.
-Set `IMAGE_NODE_BINARY` to the absolute ordinary Node.js executable for isolated
-AVIF/HEIF jobs (VentraIP: `/opt/alt/alt-nodejs24/root/usr/bin/node`). Other hosts
-default to the running Node.js executable.
-
 The compatibility backend uses the host's maintained ImageMagick installation
 for PNG, JPEG, GIF, WebP and TIFF, `libheif-js` for HEIF metadata/HEVC decoding,
 and the baseline WebAssembly AVIF decoder from `@jsquash/avif` for AVIF pixels.
 `pngjs` writes the portable decoders' PNG output. All processing stays on the
 ClickPDF server. Sharp remains installed and unchanged for other deployments.
 
-Each image is processed in an isolated child process, with a 25-second wall
+Common images use isolated child processes; portable codecs use isolated Node.js
+workers to avoid LiteSpeed launcher conflicts. Both have a 25-second wall
 timeout, capped input/output, first-frame selection and a 25-million-pixel
-dimension check before decoding. The ImageMagick policy disables delegates,
+dimension check before decoding. Portable workers cap their JavaScript heap at
+384 MiB; native/WebAssembly allocations also depend on host process limits. The ImageMagick policy disables delegates,
 filters and unrelated coders, limits threads and memory, and disables disk
 pixel caches. Commands use argument arrays without a shell; filenames and
 options are not supplied by uploaded content. These limits supplement the

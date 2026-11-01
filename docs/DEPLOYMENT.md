@@ -1,34 +1,34 @@
 # Hosting ClickPDF under a URL path
 
 ClickPDF supports a dedicated site root or a path such as `/ClickPDF/`.
-No hosted demo has been verified yet; these instructions prepare deployment.
+The application is live at **https://clickecommerce.com.au/ClickPDF/**.
 
 ## VentraIP deployment status — 2026-11-01
 
-The release containing Split / Extract PDF was uploaded to the existing private
-application directory, but public routing has **not** been enabled. The existing
-WordPress site remains separate. Node.js 24.22.2 is available on the host.
+The existing VentraIP service runs ClickPDF through CloudLinux/LiteSpeed with
+Node.js 24.22.2 and `passenger.cjs`. Source code and runtime files remain outside
+the public document root. The existing WordPress home page was checked and
+continues to return HTTP 200.
 
-The host exposes an older x86 CPU without the instructions needed by Sharp's
-Linux x64 binary. Loading Sharp fails with `Unsupported CPU: Prebuilt binaries
-for Linux x64 require v2 microarchitecture`. The official Sharp WebAssembly
-fallback was tried and also failed: `Wasm SIMD unsupported`. A native source
-build is not available in this account: executing GCC is denied and GLib/GObject
-development packages are unavailable. No PDF functionality was disabled and
-no image-processing dependency was downgraded to work around this.
+Sharp's native and WebAssembly binaries could not run on the host CPU.
+The opt-in [compatible image backend](IMAGE_BACKENDS.md) resolves this without
+removing tools or downgrading Sharp. Set `IMAGE_BACKEND=imagemagick` and
+`IMAGEMAGICK_BINARY=/bin/convert`. AVIF/HEIF decoding uses bounded Node workers;
+it does not depend on the host's unavailable AVIF/HEIF ImageMagick codecs.
 
-Ask VentraIP to move this hosting service to a server exposing x86-64-v2 CPU
-features (including SSE4.2), or provide a supported native Sharp/libvips build.
-Reference: [Sharp installation requirements](https://sharp.pixelplumbing.com/install/).
-After that change, reinstall the locked dependencies, run the workflow tests,
-and register the `/ClickPDF` application using `passenger.cjs` as its startup
-file. Recheck the full-path proxy behavior and single-process requirement below.
+All **25 automated tests passed on the host**. Live HTTPS checks verified
+image-to-PDF with PNG/JPEG/GIF/WebP/TIFF/AVIF, merge, split/extract, edit with
+image overlays, visual signatures, session-protected downloads, cross-origin
+rejection, assets and the `/ClickPDF` trailing-slash redirect. The live browser
+also rendered a synthetic four-page PDF into four PNG downloads. These checks
+cover representative documents, not every possible PDF or browser.
 
-The 22 local automated tests passed, including split extraction/order,
-range and separate-page outputs, form flattening, download ownership,
-invalid input rejection and rollback. All three split modes were also exercised
-through the local browser interface. These results do not constitute live-host
-verification.
+After updating code, use the application's process-manager restart and verify
+that the ClickPDF worker actually reloads. On this host the selector restart
+reported success without replacing the running worker. A targeted termination
+of the verified ClickPDF worker allowed LiteSpeed to respawn it with the new
+code/environment. Never restart unrelated Node applications. Restarting loses
+in-memory download sessions, so old links become invalid.
 
 ## Runtime and storage
 
@@ -57,9 +57,12 @@ PORT=3000
 ALLOWED_HOSTS=clickecommerce.com.au
 PUBLIC_ORIGIN=https://clickecommerce.com.au
 BASE_PATH=/ClickPDF
+IMAGE_BACKEND=imagemagick
+IMAGEMAGICK_BINARY=/bin/convert
+UV_THREADPOOL_SIZE=1
 ```
 
-The domain is the intended deployment target, not a claim that it is live.
+The domain above is the verified deployment target.
 Adjust host and port for the platform. `.env` files are not loaded automatically.
 `PUBLIC_ORIGIN` contains only the origin, with no path. `BASE_PATH` has no
 trailing slash; leave it empty for a dedicated site root.
@@ -97,5 +100,5 @@ documented 100 MiB combined upload limit in mind. Never publish `uploads/` or
 - Check cross-origin requests are rejected and uploaded inputs are removed.
 - Verify process supervision, resource limits and file expiration on the host.
 
-Keep the README's hosted-demo status unchanged until live checks pass.
+Repeat live checks after any deployment or hosting configuration change.
 See the [security review](PROJECT_REVIEW.md) for remaining limitations.
