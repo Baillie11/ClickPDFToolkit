@@ -66,6 +66,15 @@ header h1 {
     margin-bottom: 10px;
 }
 
+header .brand-logo {
+    display: block;
+    width: 240px;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border-radius: var(--border-radius);
+}
+
 header p {
     font-size: 1.1rem;
     opacity: 0.9;
