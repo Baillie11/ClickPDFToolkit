@@ -72,7 +72,9 @@ header .brand-logo {
     max-width: 100%;
     height: auto;
     margin: 0 auto;
-    border-radius: var(--border-radius);
+    /* White artwork with the original white background blended into the banner. */
+    filter: grayscale(1) invert(1);
+    mix-blend-mode: screen;
 }
 
 header p {
