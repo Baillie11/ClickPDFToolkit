@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add Rotate PDF with individual and whole-document controls, previews, reset and protected downloads.
+- Make the logo a home link with a gentle hover animation respecting reduced-motion preferences.
+
 - Implement Reorder Pages with lazy thumbnail previews, drag-and-drop, keyboard-accessible move controls, reverse and restore actions, and session-protected PDF downloads.
 - Validate complete page permutations and retain dimensions, rotations and flattened form appearances.
 - Add API regression tests for ordering, invalid inputs, upload cleanup and download access.

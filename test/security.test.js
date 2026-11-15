@@ -135,7 +135,7 @@ test('subpath hosting serves assets and all workflows with scoped, protected dow
     const home = await fetch(f.url + '/ClickPDF/');
     assert.equal(home.status, 200);
     const html = await home.text();
-    for (const asset of ['css/styles.css?v=white-logo', 'js/app.js', 'js/merge.js', 'js/reorder.js']) {
+    for (const asset of ['css/styles.css?v=rotate-logo', 'js/app.js', 'js/merge.js', 'js/reorder.js', 'js/rotate.js']) {
         assert.ok(html.includes(`"${asset}"`));
         assert.equal((await fetch(f.url + '/ClickPDF/' + asset)).status, 200);
     }
@@ -240,7 +240,7 @@ test('malformed documents, fields and signatures are rejected without retained u
 test('all placeholders return 501 without persisting uploaded documents', async t => {
     const f = await fixture(t);
     const { pdf } = await inputs();
-    for (const route of ['compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'rotate', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text']) {
+    for (const route of ['compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text']) {
         assert.equal((await f.post('/api/' + route, {}, [['pdf', pdf, 'sample.pdf', 'application/pdf']])).response.status, 501);
     }
     await f.uploadsEmpty();
@@ -507,4 +507,44 @@ test('reorder rejects missing, duplicate, out-of-range, malformed and unreadable
     assert.equal((await f.post('/api/reorder', { order: '[1]' }, [['pdf', locked, 'locked.pdf', 'application/pdf']])).response.status, 400);
     await f.uploadsEmpty();
     assert.deepEqual(await fs.readdir(path.join(f.root, 'output')), []);
+});
+
+test('rotate adds to existing rotations, keeps page order and content, flattens forms and protects downloads', async t => {
+    const f = await fixture(t, { basePath: '/clickpdf' });
+    const source = await PDFDocument.create();
+    for (const [width, angle] of [[300,0], [400,90], [500,180], [600,270]]) {
+        const page = source.addPage([width,700]); page.setRotation(require('pdf-lib').degrees(angle));
+        page.drawText(`Page ${width}`, { x: 20, y: 100 });
+    }
+    const field = source.getForm().createTextField('test'); field.setText('Visible form'); field.addToPage(source.getPage(1));
+    const file = ['pdf', await source.save(), 'pages.pdf', 'application/pdf'];
+    const { response, data } = await f.post('/clickpdf/api/rotate', { rotations: '[90,270,180,0]', outputFilename: 'Turned' }, [file]);
+    assert.equal(response.status,200); assert.equal(data.pageCount,4); assert.equal(data.flattenedForms,true);
+    assert.equal(data.message,'Rotated 3 pages.');
+    assert.match(data.downloadUrl,/^\/clickpdf\/download\/Turned-/);
+    assert.equal((await fetch(f.url+data.downloadUrl)).status,404);
+    const download=await fetch(f.url+data.downloadUrl,{headers:{Cookie:f.cookie()}});
+    assert.equal(download.status,200);
+    const output=await PDFDocument.load(await download.arrayBuffer());
+    assert.deepEqual(output.getPages().map(p=>[p.getWidth(),p.getHeight(),p.getRotation().angle]),[[300,700,90],[400,700,0],[500,700,0],[600,700,270]]);
+    assert.equal(output.getForm().getFields().length,0);
+    output.getPages().forEach(p=>assert.ok(p.node.Contents()));
+    await f.uploadsEmpty();
+});
+
+test('rotate rejects invalid angles, page counts, corrupt and encrypted input without retained files', async t => {
+    const f=await fixture(t); const {pdf}=await inputs(); const file=['pdf',pdf,'pages.pdf','application/pdf'];
+    for (const rotations of ['[90]','[0,90,180]','[-90,0]','[45,0]','[360,0]','["90",0]','[null,0]','{}','null','broken']) {
+        assert.equal((await f.post('/api/rotate',{rotations},[file])).response.status,400,rotations);
+    }
+    assert.equal((await f.post('/api/rotate',{},[file])).response.status,400);
+    assert.equal((await f.post('/api/rotate',{rotations:'[0,90]'})).response.status,400);
+    assert.equal((await f.post('/api/rotate',{rotations:'[0,90]'},[file,file])).response.status,413);
+    assert.equal((await f.post('/api/rotate',{rotations:'[90]'},[['pdf',Buffer.from('%PDF-broken'),'bad.pdf','application/pdf']])).response.status,400);
+    const doc=await PDFDocument.create();doc.addPage();
+    const locked=Buffer.from(Buffer.from(await doc.save({useObjectStreams:false})).toString('latin1').replace('trailer\n<<','trailer\n<< /Encrypt 1 0 R'),'latin1');
+    assert.equal((await f.post('/api/rotate',{rotations:'[90]'},[['pdf',locked,'locked.pdf','application/pdf']])).response.status,400);
+    for(let i=1;i<1001;i++)doc.addPage();
+    assert.equal((await f.post('/api/rotate',{rotations:JSON.stringify(Array(1001).fill(90))},[['pdf',await doc.save(),'many.pdf','application/pdf']])).response.status,400);
+    await f.uploadsEmpty();assert.deepEqual(await fs.readdir(path.join(f.root,'output')),[]);
 });

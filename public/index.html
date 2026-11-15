@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Click PDF Toolkit</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="css/styles.css?v=white-logo">
+    <link rel="stylesheet" href="css/styles.css?v=rotate-logo">
     <script src="vendor/pdfjs/pdf.min.js"></script>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1><img class="brand-logo" src="images/click-pdf-logo.png" alt="Click PDF Toolkit" width="1536" height="1024"></h1>
+            <h1><a class="brand-home" href="./" aria-label="Click PDF home"><img class="brand-logo" src="images/click-pdf-logo.png" alt="Click PDF Toolkit" width="1536" height="1024"></a></h1>
             <p>Your all-in-one PDF solution</p>
         </div>
     </header>
@@ -41,11 +41,11 @@
                         <p>Rearrange PDF pages</p>
                         <span class="status available">Available</span>
                     </div>
-                    <div class="tool-card" data-tool="rotate">
+                    <div class="tool-card active" data-tool="rotate" role="button" tabindex="0">
                         <div class="tool-icon">↻</div>
                         <h3>Rotate PDF</h3>
                         <p>Rotate pages 90°, 180°, 270°</p>
-                        <span class="status coming-soon">Coming Soon</span>
+                        <span class="status available">Available</span>
                     </div>
                 </div>
             </div>
@@ -220,6 +220,43 @@
                 </div>
             </div>
             
+            <div id="rotate-tool" class="tool-workspace hidden">
+                <h2>Rotate PDF</h2>
+                <p>Turn individual pages or the whole document. Preview your changes before saving.</p>
+                <form id="rotate-form">
+                    <fieldset id="rotate-controls" class="merge-controls">
+                        <legend class="sr-only">Rotate PDF pages</legend>
+                        <div id="rotate-upload-area" class="upload-area">
+                            <label for="rotate-input">Drop one PDF here or choose a file</label>
+                            <input id="rotate-input" type="file" accept="application/pdf,.pdf" aria-describedby="rotate-limits">
+                            <p id="rotate-limits" class="hint">50 MiB input · up to 1,000 pages · 100 MiB output</p>
+                        </div>
+                        <p id="rotate-summary" role="status">Choose a PDF to get started.</p>
+                        <div class="reorder-toolbar">
+                            <button type="button" id="rotate-left" disabled>Rotate all left 90°</button>
+                            <button type="button" id="rotate-right" disabled>Rotate all right 90°</button>
+                            <button type="button" id="rotate-half" disabled>Rotate all 180°</button>
+                            <button type="button" id="rotate-restore" disabled>Reset rotations</button>
+                            <button type="button" id="rotate-clear">Clear</button>
+                        </div>
+                        <p id="rotate-status" role="status" aria-live="polite"></p>
+                        <ol id="rotate-pages" class="reorder-pages rotate-pages" aria-label="PDF page rotations"></ol>
+                        <div class="form-group">
+                            <label for="rotate-name">Output filename</label>
+                            <input id="rotate-name" type="text" maxlength="100" value="rotated-document">
+                        </div>
+                        <p class="hint">Rotations are relative to the original pages. Every page is kept in its original order. Processed on the ClickPDF server when you save. Form fields are flattened; bookmarks, attachments and digital signature validity are not preserved.</p>
+                        <button id="rotate-btn" class="convert-btn" type="submit" disabled>Save rotated PDF</button>
+                    </fieldset>
+                </form>
+                <p id="rotate-error" class="error-message hidden" role="alert"></p>
+                <div id="rotate-result" class="result hidden" role="status">
+                    <h3>Your rotated PDF is ready</h3>
+                    <p id="rotate-result-message"></p>
+                    <a id="rotate-download" class="download-btn" download>Download rotated PDF</a>
+                </div>
+            </div>
+
             <div id="reorder-tool" class="tool-workspace hidden">
                 <h2>Reorder Pages</h2>
                 <p>Put your pages in the right order, then download a new PDF.</p>
@@ -739,6 +776,7 @@
     <script src="js/pageSelection.js"></script>
     <script src="js/split.js"></script>
     <script src="js/reorder.js"></script>
+    <script src="js/rotate.js"></script>
     <script src="js/merge.js"></script>
     <script src="js/app.js"></script>
 </body>

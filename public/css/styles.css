@@ -1651,3 +1651,19 @@ footer .copyright a:hover {
 .reorder-card-controls input { width: 65px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; }
 .reorder-toolbar button:disabled, .reorder-card-controls button:disabled { opacity: .45; cursor: default; }
 #reorder-tool :focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+
+/* The logo is a home link with motion disabled for reduced-motion preferences. */
+header .brand-home { display: block; width: fit-content; max-width: 100%; margin: 0 auto; }
+header .brand-home:focus-visible { outline: 3px solid white; outline-offset: 6px; border-radius: 8px; }
+header .brand-home:hover .brand-logo, header .brand-home:focus-visible .brand-logo { animation: brand-bob 1s ease-in-out infinite; }
+@keyframes brand-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { header .brand-home:hover .brand-logo, header .brand-home:focus-visible .brand-logo { animation: none; } }
+.rotate-pages li { cursor: default; }
+.rotate-preview { height: 240px; display: flex; align-items: center; justify-content: center; }
+.rotate-preview canvas { margin: 0; }
+.rotation-0 { transform: rotate(0deg); }
+.rotation-90 { transform: rotate(90deg); }
+.rotation-180 { transform: rotate(180deg); }
+.rotation-270 { transform: rotate(270deg); }
+.rotate-angle { font-size: 13px; min-height: 32px; margin: 10px 0; }
+#rotate-tool :focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }

@@ -24,7 +24,7 @@ Actual deployed application screenshot using a synthetic four-page document. **[
 - **Simple interface:** browse or drop files, choose settings and download a PDF.
 - **Approachable JavaScript:** Express routes and vanilla HTML/CSS/JavaScript.
 
-This early-stage free PDF toolkit currently has six server-side workflows plus a browser-only PDF to Image tool. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
+This early-stage free PDF toolkit currently has seven server-side workflows plus a browser-only PDF to Image tool. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
 
 ## Features
 
@@ -32,6 +32,7 @@ This early-stage free PDF toolkit currently has six server-side workflows plus a
 
 | Tool | Implemented behavior | Limits |
 | --- | --- | --- |
+| Rotate PDF | Rotate individual pages or all pages left/right 90° or 180°, with previews and reset | 50 MiB input, 1,000 pages, 100 MiB output. Rotations are relative to existing orientation. Forms are flattened; bookmarks, attachments and digital signature validity are not preserved. |
 | Reorder Pages | Thumbnail previews, drag-and-drop, Earlier / Later and move-to-position controls, reverse and restore order; keep every page exactly once | 50 MiB input, 1,000 pages, 100 MiB output. Forms are flattened; bookmarks, attachments and digital signature validity are not preserved. |
 | Split / Extract PDF | Extract selected pages into one PDF, split into ranges, or save every page separately; preserve listed order, page sizes and rotations | 50 MiB input, 1,000 source pages, 50 output files, 100 MiB combined output. Individual downloads, no ZIP. Form fields are flattened. Bookmarks, attachments and digital signature validity are not preserved. Not secure redaction. |
 | Merge PDFs | Combine 2–50 PDFs in a chosen order; reorder/remove files, custom output name, preserve page sizes and rotations | 50 MiB per file, 100 MiB total, 1,000 pages. Encrypted or unreadable PDFs are rejected. Form fields are flattened; bookmarks, attachments and digital signature validity are not preserved. |
@@ -46,15 +47,14 @@ Representative API workflows were verified with synthetic documents locally on N
 
 | Category | Status |
 | --- | --- |
-| The seven tools above | Implemented for the stated scope, with documented limitations |
+| The eight tools above | Implemented for the stated scope, with documented limitations |
 | Broader editing / signing capabilities | Partial: overlays and visual signing exist; broader editing and cryptographic signing do not |
-| Rotate | UI cards and API scaffolds; processing not implemented |
 | Compress, watermark | UI cards and API scaffolds; processing not implemented |
 | Word, PowerPoint, Excel ↔ PDF | UI cards and API scaffolds; conversion not implemented |
 | HTML to PDF | UI card and API scaffold; conversion not implemented |
 | Protect, unlock, OCR, extract text | UI cards and API scaffolds; processing not implemented |
 
-All 15 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon” expresses intended scope, not a delivery date. Do not upload documents to these endpoints expecting processing.
+All 14 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon” expresses intended scope, not a delivery date. Do not upload documents to these endpoints expecting processing.
 
 ## Installation
 
@@ -130,7 +130,7 @@ For shared hosting, use access restrictions, HTTPS and resource limits, and addr
 
 ```text
 public/       HTML, CSS, browser JavaScript and bundled pdf.js (public/vendor/pdfjs)
-routes/       Six implemented tools and 15 placeholder handlers
+routes/       Seven implemented tools and 14 placeholder handlers
 server.js     Express, uploads, downloads and cleanup
 docs/         API reference and repository review
 uploads/      Runtime input files (ignored)
@@ -150,7 +150,7 @@ Suggested priorities, with no promised release dates:
 - [x] Implement Merge PDFs with document ordering and form flattening.
 - [x] Implement split/extract pages, range outputs and separate-page outputs.
 - [x] Implement a dedicated page reorder interface.
-- [ ] Implement rotate.
+- [x] Implement rotate with individual and whole-document previews.
 - [ ] Evaluate remaining conversion, compression, watermark, password and text tools before committing to their scope.
 
 ## Contributing
