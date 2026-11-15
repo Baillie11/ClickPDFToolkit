@@ -41,5 +41,11 @@
   ],
   "engines": {
     "node": ">=20.19.0"
+  },
+  "devDependencies": {
+    "dompurify": "3.4.18",
+    "html-to-pdfmake": "^2.5.32",
+    "mammoth": "^1.13.0",
+    "pdfmake": "^0.2.20"
   }
 }

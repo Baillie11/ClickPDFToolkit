@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSplitPdf();
     initReorderPdf();
     initRotatePdf();
+    initWordPdf();
     initImageToPdf();
     initEditPdf();
     initSignPdf();
@@ -121,6 +122,7 @@ function showTool(tool) {
     document.getElementById('split-tool').classList.add('hidden');
     document.getElementById('reorder-tool').classList.add('hidden');
     document.getElementById('rotate-tool').classList.add('hidden');
+    document.getElementById('word-tool').classList.add('hidden');
     
     // Hide tool grid, show workspace
     toolGrid.classList.add('hidden');
@@ -129,6 +131,8 @@ function showTool(tool) {
     // Show appropriate tool
     if (tool === 'merge') {
         mergeTool.classList.remove('hidden');
+    } else if (tool === 'word-to-pdf') {
+        document.getElementById('word-tool').classList.remove('hidden');
     } else if (tool === 'rotate') {
         document.getElementById('rotate-tool').classList.remove('hidden');
     } else if (tool === 'reorder') {
@@ -188,6 +192,7 @@ function showToolGrid() {
     resetSplitPdfForm();
     resetReorderPdfForm();
     resetRotatePdfForm();
+    resetWordPdfForm();
     resetPdfToImageForm();
 }
 

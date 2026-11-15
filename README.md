@@ -24,7 +24,7 @@ Actual deployed application screenshot using a synthetic four-page document. **[
 - **Simple interface:** browse or drop files, choose settings and download a PDF.
 - **Approachable JavaScript:** Express routes and vanilla HTML/CSS/JavaScript.
 
-This early-stage free PDF toolkit currently has seven server-side workflows plus a browser-only PDF to Image tool. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
+This early-stage free PDF toolkit currently has seven server-side workflows plus browser-only PDF to Image and Word to PDF tools. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
 
 ## Features
 
@@ -32,6 +32,7 @@ This early-stage free PDF toolkit currently has seven server-side workflows plus
 
 | Tool | Implemented behavior | Limits |
 | --- | --- | --- |
+| Word to PDF | Free DOCX conversion on the device; text, headings, lists, basic tables and embedded PNG/JPEG images; A4/Letter and custom filename | Simplified formatting, not Word layout fidelity. Fonts, spacing, pagination, columns, headers/footers, text boxes and complex graphics may change or be omitted. Some scripts/glyphs are unsupported. DOC/password-protected files unsupported. 10 MiB compressed, 30 MiB expanded ZIP metadata, 2,000 ZIP entries, 50 MiB PDF; 45 seconds per worker stage. Review before sharing. |
 | Rotate PDF | Rotate individual pages or all pages left/right 90° or 180°, with previews and reset | 50 MiB input, 1,000 pages, 100 MiB output. Rotations are relative to existing orientation. Forms are flattened; bookmarks, attachments and digital signature validity are not preserved. |
 | Reorder Pages | Thumbnail previews, drag-and-drop, Earlier / Later and move-to-position controls, reverse and restore order; keep every page exactly once | 50 MiB input, 1,000 pages, 100 MiB output. Forms are flattened; bookmarks, attachments and digital signature validity are not preserved. |
 | Split / Extract PDF | Extract selected pages into one PDF, split into ranges, or save every page separately; preserve listed order, page sizes and rotations | 50 MiB input, 1,000 source pages, 50 output files, 100 MiB combined output. Individual downloads, no ZIP. Form fields are flattened. Bookmarks, attachments and digital signature validity are not preserved. Not secure redaction. |

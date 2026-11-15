@@ -1652,12 +1652,12 @@ footer .copyright a:hover {
 .reorder-toolbar button:disabled, .reorder-card-controls button:disabled { opacity: .45; cursor: default; }
 #reorder-tool :focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 
-/* The logo is a home link with motion disabled for reduced-motion preferences. */
+/* Hover explicitly triggers the requested bounce; keyboard focus stays still in reduced-motion mode. */
 header .brand-home { display: block; width: fit-content; max-width: 100%; margin: 0 auto; }
 header .brand-home:focus-visible { outline: 3px solid white; outline-offset: 6px; border-radius: 8px; }
-header .brand-home:hover .brand-logo, header .brand-home:focus-visible .brand-logo { animation: brand-bob 1s ease-in-out infinite; }
-@keyframes brand-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-@media (prefers-reduced-motion: reduce) { header .brand-home:hover .brand-logo, header .brand-home:focus-visible .brand-logo { animation: none; } }
+header .brand-home:hover .brand-logo, header .brand-home:focus-visible .brand-logo { animation: brand-bounce 900ms ease-in-out infinite; }
+@keyframes brand-bounce { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(-14px); } 55% { transform: translateY(0); } 70% { transform: translateY(-6px); } 85% { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { header .brand-home:focus-visible:not(:hover) .brand-logo { animation: none; } }
 .rotate-pages li { cursor: default; }
 .rotate-preview { height: 240px; display: flex; align-items: center; justify-content: center; }
 .rotate-preview canvas { margin: 0; }
@@ -1667,3 +1667,9 @@ header .brand-home:hover .brand-logo, header .brand-home:focus-visible .brand-lo
 .rotation-270 { transform: rotate(270deg); }
 .rotate-angle { font-size: 13px; min-height: 32px; margin: 10px 0; }
 #rotate-tool :focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.word-notice { margin: 20px 0; padding: 18px; background: #fffbeb; border: 1px solid #fbbf24; border-radius: 10px; }
+.word-notice p + p { margin-top: 10px; }
+#word-input { display: block; margin: 16px auto; max-width: 100%; }
+#word-clear { margin-top: 12px; padding: 10px 20px; cursor: pointer; }
+#word-summary { overflow-wrap: anywhere; margin: 12px 0; }
+[data-tool="word-to-pdf"]:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }

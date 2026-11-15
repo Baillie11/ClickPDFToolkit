@@ -135,7 +135,7 @@ test('subpath hosting serves assets and all workflows with scoped, protected dow
     const home = await fetch(f.url + '/ClickPDF/');
     assert.equal(home.status, 200);
     const html = await home.text();
-    for (const asset of ['css/styles.css?v=rotate-logo', 'js/app.js', 'js/merge.js', 'js/reorder.js', 'js/rotate.js']) {
+    for (const asset of ['css/styles.css?v=logo-bounce', 'js/app.js', 'js/merge.js', 'js/reorder.js', 'js/rotate.js']) {
         assert.ok(html.includes(`"${asset}"`));
         assert.equal((await fetch(f.url + '/ClickPDF/' + asset)).status, 200);
     }

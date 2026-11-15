@@ -1,5 +1,9 @@
 # ClickPDF API
 
+## Word to PDF (browser only)
+
+The Word to PDF interface converts DOCX locally with vendored Mammoth, DOMPurify, html-to-pdfmake and pdfmake. It makes no conversion API request and uploads no document. `/api/word-to-pdf` remains a 501 scaffold. Limits and formatting caveats are displayed before file selection. Dependencies are loaded from `vendor/word/`; workers under `js/` are terminated on reset, errors and timeout.
+
 ## Rotate pages
 
 `POST /api/rotate` accepts one multipart `pdf`, `rotations` as a JSON array

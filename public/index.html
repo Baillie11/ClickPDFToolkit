@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Click PDF Toolkit</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="css/styles.css?v=rotate-logo">
+    <link rel="stylesheet" href="css/styles.css?v=logo-bounce">
     <script src="vendor/pdfjs/pdf.min.js"></script>
 </head>
 <body>
@@ -60,11 +60,11 @@
                         <p>Convert images to PDF</p>
                         <span class="status available">Available</span>
                     </div>
-                    <div class="tool-card" data-tool="word-to-pdf">
+                    <div class="tool-card active" data-tool="word-to-pdf" role="button" tabindex="0">
                         <div class="tool-icon">📝</div>
                         <h3>Word to PDF</h3>
-                        <p>Convert Word documents to PDF</p>
-                        <span class="status coming-soon">Coming Soon</span>
+                        <p>Convert DOCX files with simplified formatting</p>
+                        <span class="status available">Available</span>
                     </div>
                     <div class="tool-card" data-tool="ppt-to-pdf">
                         <div class="tool-icon">📊</div>
@@ -220,6 +220,33 @@
                 </div>
             </div>
             
+            <div id="word-tool" class="tool-workspace hidden">
+                <h2>Word to PDF</h2>
+                <p>Free DOCX conversion, entirely in your browser. Your document stays on your device.</p>
+                <div class="word-notice">
+                    <h3>Simple formatting, not an exact Word copy</h3>
+                    <p>Best for text, headings, lists, basic tables and embedded PNG/JPEG images. The PDF uses a standard font and a new page layout. Original fonts, spacing, page breaks, columns, headers, footers, text boxes and complex graphics may change or be omitted. Some languages and symbols may not display correctly. Review the PDF before sharing.</p>
+                    <p>Older .doc files and password-protected documents are not supported. Save them as an unencrypted .docx in Word first.</p>
+                </div>
+                <form id="word-form">
+                    <fieldset id="word-controls" class="merge-controls">
+                        <legend class="sr-only">Convert DOCX to PDF</legend>
+                        <div id="word-upload-area" class="upload-area">
+                            <label for="word-input">Drop one DOCX here or choose a file</label>
+                            <input id="word-input" type="file" accept=".docx" aria-describedby="word-limits">
+                            <p id="word-limits" class="hint">Up to 10 MiB; large or complex documents may exceed browser limits.</p>
+                        </div>
+                        <p id="word-summary" role="status">Choose a DOCX to get started.</p>
+                        <div class="form-group"><label for="word-name">Output filename</label><input id="word-name" type="text" maxlength="100" value="converted-document"></div>
+                        <div class="form-group"><label for="word-size">PDF page size</label><select id="word-size"><option value="A4">A4</option><option value="LETTER">Letter</option></select></div>
+                        <button id="word-btn" class="convert-btn" type="submit" disabled>Convert to PDF</button>
+                        <button id="word-clear" type="button">Clear</button>
+                    </fieldset>
+                </form>
+                <p id="word-error" class="error-message hidden" role="alert"></p>
+                <div id="word-result" class="result hidden" role="status"><h3>Your PDF is ready</h3><p id="word-result-message"></p><a id="word-download" class="download-btn" download>Download PDF</a></div>
+            </div>
+
             <div id="rotate-tool" class="tool-workspace hidden">
                 <h2>Rotate PDF</h2>
                 <p>Turn individual pages or the whole document. Preview your changes before saving.</p>
@@ -777,6 +804,7 @@
     <script src="js/split.js"></script>
     <script src="js/reorder.js"></script>
     <script src="js/rotate.js"></script>
+    <script src="js/word.js"></script>
     <script src="js/merge.js"></script>
     <script src="js/app.js"></script>
 </body>
