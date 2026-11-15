@@ -1,5 +1,18 @@
 # ClickPDF API
 
+## Reorder pages
+
+`POST /api/reorder` accepts one multipart `pdf`, `order` as a JSON array of
+1-based page positions (for example `[3,1,2]`), and optional `outputFilename`.
+Every source page must appear exactly once. Limits: 50 MiB input, 1,000 pages,
+100 MiB output. Invalid, encrypted or incomplete input returns 400; upload
+limits return 413. Page dimensions and rotations are preserved. Forms are
+flattened; bookmarks, attachments and digital signature validity are not preserved.
+
+Success returns `success`, `message`, `pageCount`, `flattenedForms`, `filename`
+and a session-protected `downloadUrl`, including the configured base path.
+
+
 ## Split / extract pages
 
 `POST /api/split` accepts one multipart `pdf` (50 MiB maximum), optional
@@ -150,6 +163,6 @@ Invalid content, missing input, invalid pages and invalid options return 400 wit
 
 These routes perform no document processing and return 501 for otherwise accepted requests:
 
-`/api/compress`, `/api/pdf-to-word`, `/api/word-to-pdf`, `/api/pdf-to-ppt`, `/api/ppt-to-pdf`, `/api/pdf-to-excel`, `/api/excel-to-pdf`, `/api/pdf-to-image`, `/api/watermark`, `/api/rotate`, `/api/html-to-pdf`, `/api/unlock`, `/api/protect`, `/api/ocr`, `/api/extract-text`, `/api/reorder`.
+`/api/compress`, `/api/pdf-to-word`, `/api/word-to-pdf`, `/api/pdf-to-ppt`, `/api/ppt-to-pdf`, `/api/pdf-to-excel`, `/api/excel-to-pdf`, `/api/pdf-to-image`, `/api/watermark`, `/api/rotate`, `/api/html-to-pdf`, `/api/unlock`, `/api/protect`, `/api/ocr`, `/api/extract-text`.
 
 The server returns 501 before parsing or saving uploads. Do not use these routes as converters.

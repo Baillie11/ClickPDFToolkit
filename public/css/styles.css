@@ -1637,3 +1637,17 @@ footer .copyright a:hover {
 .p2i-progress-text { text-align: center; margin-top: 8px; font-size: 0.9rem; color: var(--gray-500); }
 .p2i-result { margin-top: 24px; }
 .p2i-images { margin-top: 16px; }
+
+/* Reorder pages */
+.reorder-toolbar, .reorder-card-controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.reorder-toolbar { margin: 20px 0; }
+.reorder-pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; padding: 0; list-style: none; margin: 20px 0; }
+.reorder-pages li { border: 2px solid #e2e8f0; border-radius: 12px; padding: 14px; background: #f8fafc; text-align: center; min-width: 0; cursor: grab; }
+.reorder-pages li.reorder-drop { border-color: #2563eb; background: #eff6ff; }
+.reorder-position { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.reorder-pages canvas { display: block; margin: 0 auto 14px; max-width: 100%; background: white; box-shadow: 0 2px 8px #0002; }
+.reorder-toolbar button, .reorder-card-controls button { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #1e293b; cursor: pointer; }
+.reorder-card-controls { justify-content: center; }
+.reorder-card-controls input { width: 65px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.reorder-toolbar button:disabled, .reorder-card-controls button:disabled { opacity: .45; cursor: default; }
+#reorder-tool :focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }

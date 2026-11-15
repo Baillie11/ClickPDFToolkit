@@ -135,7 +135,7 @@ test('subpath hosting serves assets and all workflows with scoped, protected dow
     const home = await fetch(f.url + '/ClickPDF/');
     assert.equal(home.status, 200);
     const html = await home.text();
-    for (const asset of ['css/styles.css', 'js/app.js', 'js/merge.js']) {
+    for (const asset of ['css/styles.css?v=white-logo', 'js/app.js', 'js/merge.js', 'js/reorder.js']) {
         assert.ok(html.includes(`"${asset}"`));
         assert.equal((await fetch(f.url + '/ClickPDF/' + asset)).status, 200);
     }
@@ -240,7 +240,7 @@ test('malformed documents, fields and signatures are rejected without retained u
 test('all placeholders return 501 without persisting uploaded documents', async t => {
     const f = await fixture(t);
     const { pdf } = await inputs();
-    for (const route of ['compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'rotate', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text', 'reorder']) {
+    for (const route of ['compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'rotate', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text']) {
         assert.equal((await f.post('/api/' + route, {}, [['pdf', pdf, 'sample.pdf', 'application/pdf']])).response.status, 501);
     }
     await f.uploadsEmpty();
@@ -468,4 +468,43 @@ test('merge interface orders files, removes entries, handles limits and submits 
     assert.equal(list.children.length, 1);
     vm.runInContext('resetMergePdfForm();', context);
     assert.equal(list.children.length, 0);
+});
+
+test('reorder preserves all pages, dimensions, rotation, form appearances and session ownership under a base path', async t => {
+    const f = await fixture(t, { basePath: '/clickpdf' });
+    const source = await PDFDocument.create();
+    source.addPage([300, 400]); source.addPage([500, 600]);
+    source.addPage([700, 800]).setRotation(require('pdf-lib').degrees(90));
+    const field = source.getForm().createTextField('name'); field.setText('Reorder test'); field.addToPage(source.getPage(0));
+    const file = ['pdf', await source.save(), 'pages.pdf', 'application/pdf'];
+    const { response, data } = await f.post('/clickpdf/api/reorder', { order: '[3,1,2]', outputFilename: 'Ordered' }, [file]);
+    assert.equal(response.status, 200); assert.equal(data.pageCount, 3); assert.equal(data.flattenedForms, true);
+    assert.match(data.downloadUrl, /^\/clickpdf\/download\//);
+    assert.equal((await fetch(f.url + data.downloadUrl)).status, 404);
+    const download = await fetch(f.url + data.downloadUrl, { headers: { Cookie: f.cookie() } });
+    assert.equal(download.status, 200);
+    const result = await PDFDocument.load(await download.arrayBuffer());
+    assert.deepEqual(result.getPages().map(p => [p.getWidth(), p.getHeight(), p.getRotation().angle]), [[700,800,90], [300,400,0], [500,600,0]]);
+    assert.equal(result.getForm().getFields().length, 0);
+    assert.ok(result.getPage(1).node.Contents());
+    await f.uploadsEmpty();
+});
+
+test('reorder rejects missing, duplicate, out-of-range, malformed and unreadable input and cleans uploads', async t => {
+    const f = await fixture(t);
+    const { pdf } = await inputs();
+    const file = ['pdf', pdf, 'pages.pdf', 'application/pdf'];
+    for (const order of ['[1]', '[1,1]', '[0,2]', '[1,3]', '[1,2,3]', '[1,"2"]', 'null', '{}', 'broken', '[1,1.5]']) {
+        assert.equal((await f.post('/api/reorder', { order }, [file])).response.status, 400, order);
+    }
+    assert.equal((await f.post('/api/reorder', {}, [file])).response.status, 400);
+    assert.equal((await f.post('/api/reorder', { order: '[1,2]' })).response.status, 400);
+    assert.equal((await f.post('/api/reorder', { order: '[1,2]' }, [file, file])).response.status, 413);
+    assert.equal((await f.post('/api/reorder', { order: '[1]' }, [['pdf', Buffer.from('%PDF-broken'), 'bad.pdf', 'application/pdf']])).response.status, 400);
+    // Plain object PDFs make the encryption marker explicit for the loader.
+    const doc = await PDFDocument.create(); doc.addPage();
+    const locked = Buffer.from(Buffer.from(await doc.save({ useObjectStreams: false })).toString('latin1').replace('trailer\n<<', 'trailer\n<< /Encrypt 1 0 R'), 'latin1');
+    assert.equal((await f.post('/api/reorder', { order: '[1]' }, [['pdf', locked, 'locked.pdf', 'application/pdf']])).response.status, 400);
+    await f.uploadsEmpty();
+    assert.deepEqual(await fs.readdir(path.join(f.root, 'output')), []);
 });

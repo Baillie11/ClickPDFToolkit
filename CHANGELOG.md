@@ -1,5 +1,12 @@
 # Change log
 
+## Unreleased
+
+- Implement Reorder Pages with lazy thumbnail previews, drag-and-drop, keyboard-accessible move controls, reverse and restore actions, and session-protected PDF downloads.
+- Validate complete page permutations and retain dimensions, rotations and flattened form appearances.
+- Add API regression tests for ordering, invalid inputs, upload cleanup and download access.
+
+
 This file records changes from the repository presentation update onward. The package version is 1.0.0; no historical release dates are inferred.
 
 ## Unreleased

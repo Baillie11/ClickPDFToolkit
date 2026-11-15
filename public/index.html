@@ -35,11 +35,11 @@
                         <p>Extract pages or split into separate PDFs</p>
                         <span class="status available">Available</span>
                     </div>
-                    <div class="tool-card" data-tool="reorder">
+                    <div class="tool-card active" data-tool="reorder" role="button" tabindex="0">
                         <div class="tool-icon">🔄</div>
                         <h3>Reorder Pages</h3>
                         <p>Rearrange PDF pages</p>
-                        <span class="status coming-soon">Coming Soon</span>
+                        <span class="status available">Available</span>
                     </div>
                     <div class="tool-card" data-tool="rotate">
                         <div class="tool-icon">↻</div>
@@ -220,6 +220,42 @@
                 </div>
             </div>
             
+            <div id="reorder-tool" class="tool-workspace hidden">
+                <h2>Reorder Pages</h2>
+                <p>Put your pages in the right order, then download a new PDF.</p>
+                <form id="reorder-form">
+                    <fieldset id="reorder-controls" class="merge-controls">
+                        <legend class="sr-only">Reorder PDF pages</legend>
+                        <div id="reorder-upload-area" class="upload-area">
+                            <label for="reorder-input">Drop one PDF here or choose a file</label>
+                            <input id="reorder-input" type="file" accept="application/pdf,.pdf" aria-describedby="reorder-limits">
+                            <p id="reorder-limits" class="hint">50 MiB input · up to 1,000 pages · 100 MiB output</p>
+                        </div>
+                        <p id="reorder-summary" role="status">Choose a PDF to get started.</p>
+                        <p class="hint">Drag a page onto another position, use Earlier / Later, or enter a destination and select Move. Original page numbers stay visible. Every page is kept.</p>
+                        <div class="reorder-toolbar">
+                            <button type="button" id="reorder-reverse" disabled>Reverse order</button>
+                            <button type="button" id="reorder-restore" disabled>Restore original order</button>
+                            <button type="button" id="reorder-clear">Clear</button>
+                        </div>
+                        <p id="reorder-status" role="status" aria-live="polite"></p>
+                        <ol id="reorder-pages" class="reorder-pages" aria-label="New PDF page order"></ol>
+                        <div class="form-group">
+                            <label for="reorder-name">Output filename</label>
+                            <input id="reorder-name" type="text" maxlength="100" value="reordered-document">
+                        </div>
+                        <p class="hint">Processed on the ClickPDF server when you save. Form fields are flattened; bookmarks, attachments and digital signature validity are not preserved.</p>
+                        <button id="reorder-btn" class="convert-btn" type="submit" disabled>Save reordered PDF</button>
+                    </fieldset>
+                </form>
+                <p id="reorder-error" class="error-message hidden" role="alert"></p>
+                <div id="reorder-result" class="result hidden" role="status">
+                    <h3>Your reordered PDF is ready</h3>
+                    <p id="reorder-result-message"></p>
+                    <a id="reorder-download" class="download-btn" download>Download reordered PDF</a>
+                </div>
+            </div>
+
             <div id="split-tool" class="tool-workspace hidden">
                 <h2>✂️ Split / Extract PDF</h2>
                 <p>Keep the pages you need, or divide a document into separate PDFs.</p>
@@ -702,6 +738,7 @@
 
     <script src="js/pageSelection.js"></script>
     <script src="js/split.js"></script>
+    <script src="js/reorder.js"></script>
     <script src="js/merge.js"></script>
     <script src="js/app.js"></script>
 </body>
