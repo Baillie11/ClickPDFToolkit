@@ -62,6 +62,40 @@ of the verified ClickPDF worker allowed LiteSpeed to respawn it with the new
 code/environment. Never restart unrelated Node applications. Restarting loses
 in-memory download sessions, so old links become invalid.
 
+## Compress PDF release — 2026-11-17 (v1.1.0)
+
+Compression was deployed from the versioned repository and verified over HTTPS.
+The production engine uses the existing ImageMagick backend; no new runtime
+dependency or paid conversion service was added. All 35 host-side compression,
+interface, image, editor and security tests passed in private staging. Run these
+tests with the underlying Node binary rather than the nodevenv launcher (which
+restores production routing variables), and limit the shared-host thread pool:
+
+```sh
+env -u BASE_PATH -u PUBLIC_ORIGIN ALLOWED_HOSTS=localhost,127.0.0.1,[::1] \
+  UV_THREADPOOL_SIZE=1 IMAGE_BACKEND=imagemagick IMAGEMAGICK_BINARY=/bin/convert \
+  /opt/alt/alt-nodejs24/root/usr/bin/node --v8-pool-size=1 \
+  --test-isolation=none --test-concurrency=1 --test \
+  test/compress.test.js test/compress-ui.test.js test/images.test.js \
+  test/security.test.js test/editor.test.js
+```
+
+A synthetic 2,591,976-byte PDF became 348,237 / 201,962 / 49,112 bytes
+with the quality / balanced / smallest presets. Live downloads retained page
+count, rotation and form values; size targeting, original-file fallback,
+cross-session denial, cross-origin rejection, invalid options and merge-to-compress
+handoff passed. The WordPress home page and new frontend assets returned HTTP 200.
+The output PDF was also rendered for visual review. Browser UI automation stopped
+because it could not verify the current Chrome URL, so a manual interactive
+browser review remains outstanding; interface behavior has automated coverage.
+
+The restart marker alone did not reload the old worker. The verified ClickPDF
+process was terminated and LiteSpeed respawned it; live API checks then passed.
+The pre-release tracked source is archived privately at
+`tmp/pre-compress-0c0b3db.tar.gz`; the previous repository revision is `0c0b3db`.
+Preserve untracked host launchers and `.htaccess` during any rollback, then restart
+only the verified ClickPDF worker and repeat HTTPS checks.
+
 ## Runtime and storage
 
 Use a supported Node.js LTS release compatible with `package.json` (22 or 24).

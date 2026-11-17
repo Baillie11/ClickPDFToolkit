@@ -75,7 +75,8 @@ async function previewCompressedPdf(url, version) {
     compressElement('preview-status').textContent = 'Loading preview…';
     compressElement('page-label').textContent = '';
     try {
-        compressLoading = pdfjsLib.getDocument({ url, isEvalSupported: false });
+        // One authenticated download avoids exhausting the download rate limit with range requests.
+        compressLoading = pdfjsLib.getDocument({ url, isEvalSupported: false, disableRange: true, disableStream: true });
         const doc = await compressLoading.promise;
         if (version !== compressVersion) { await doc.destroy(); return; }
         compressDoc = doc; compressPage = 1;
