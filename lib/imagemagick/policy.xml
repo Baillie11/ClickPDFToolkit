@@ -5,6 +5,7 @@
   <policy domain="coder" rights="none" pattern="*" />
   <policy domain="coder" rights="read" pattern="{PNG,JPEG,GIF,WEBP,TIFF,AVIF,HEIC,HEIF}" />
   <policy domain="coder" rights="read|write" pattern="PNG" />
+  <policy domain="coder" rights="read|write" pattern="JPEG" />
   <policy domain="coder" rights="write" pattern="INFO" />
   <policy domain="path" rights="none" pattern="@*" />
   <policy domain="path" rights="none" pattern="|*" />

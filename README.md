@@ -24,7 +24,7 @@ Actual deployed application screenshot using a synthetic four-page document. **[
 - **Simple interface:** browse or drop files, choose settings and download a PDF.
 - **Approachable JavaScript:** Express routes and vanilla HTML/CSS/JavaScript.
 
-This early-stage free PDF toolkit currently has seven server-side workflows plus browser-only PDF to Image and Word to PDF tools. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
+This early-stage free PDF toolkit currently has eight server-side workflows plus browser-only PDF to Image and Word to PDF tools. Use it locally or in a trusted, access-controlled environment. Read the privacy section before deployment.
 
 ## Features
 
@@ -32,6 +32,7 @@ This early-stage free PDF toolkit currently has seven server-side workflows plus
 
 | Tool | Implemented behavior | Limits |
 | --- | --- | --- |
+| Compress PDF | Three image-quality presets, optional 2 MB / 5 MB / custom target, size savings, page preview and direct handoff from completed server tools | 50 MiB input, 1,000 pages, 45-second deadline. Optimises supported 8-bit RGB/gray JPEG and simple Flate images; leaves masks, indexed/ICC colours and predictor encodings untouched. Existing text, forms and page geometry retained. Targets are best effort; original returned if no smaller output is found. Encrypted and digitally signed PDFs rejected. |
 | Word to PDF | Free DOCX conversion on the device; text, headings, lists, basic tables and embedded PNG/JPEG images; A4/Letter and custom filename | Simplified formatting, not Word layout fidelity. Fonts, spacing, pagination, columns, headers/footers, text boxes and complex graphics may change or be omitted. Some scripts/glyphs are unsupported. DOC/password-protected files unsupported. 10 MiB compressed, 30 MiB expanded ZIP metadata, 2,000 ZIP entries, 50 MiB PDF; 45 seconds per worker stage. Review before sharing. |
 | Rotate PDF | Rotate individual pages or all pages left/right 90° or 180°, with previews and reset | 50 MiB input, 1,000 pages, 100 MiB output. Rotations are relative to existing orientation. Forms are flattened; bookmarks, attachments and digital signature validity are not preserved. |
 | Reorder Pages | Thumbnail previews, drag-and-drop, Earlier / Later and move-to-position controls, reverse and restore order; keep every page exactly once | 50 MiB input, 1,000 pages, 100 MiB output. Forms are flattened; bookmarks, attachments and digital signature validity are not preserved. |
@@ -48,14 +49,14 @@ Representative API workflows were verified with synthetic documents locally on N
 
 | Category | Status |
 | --- | --- |
-| The eight tools above | Implemented for the stated scope, with documented limitations |
+| The tools above | Implemented for the stated scope, with documented limitations |
 | Broader editing / signing capabilities | Partial: overlays and visual signing exist; broader editing and cryptographic signing do not |
-| Compress, watermark | UI cards and API scaffolds; processing not implemented |
+| Watermark | UI cards and API scaffolds; processing not implemented |
 | Word, PowerPoint, Excel ↔ PDF | UI cards and API scaffolds; conversion not implemented |
 | HTML to PDF | UI card and API scaffold; conversion not implemented |
 | Protect, unlock, OCR, extract text | UI cards and API scaffolds; processing not implemented |
 
-All 14 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon” expresses intended scope, not a delivery date. Do not upload documents to these endpoints expecting processing.
+All 13 scaffold endpoints return **HTTP 501 Not Implemented**. “Coming Soon” expresses intended scope, not a delivery date. Do not upload documents to these endpoints expecting processing.
 
 ## Installation
 
@@ -102,6 +103,7 @@ Margins use PDF points; zero margin and zero coordinates are supported. Numeric 
 
 | Endpoint | Multipart input |
 | --- | --- |
+| `POST /api/compress` | One `pdf` or session-owned `sourceFilename`, `preset`, optional `targetMB` and `outputFilename` |
 | `POST /api/split` | One `pdf`, `mode` (`extract`, `ranges`, `pages`), `pages` selection and optional `outputFilename` |
 | `POST /api/merge` | Repeated `pdfs` files in merge order, optional `outputFilename` |
 | `POST /api/image-to-pdf` | Repeated `images` files and page options |
@@ -131,7 +133,7 @@ For shared hosting, use access restrictions, HTTPS and resource limits, and addr
 
 ```text
 public/       HTML, CSS, browser JavaScript and bundled pdf.js (public/vendor/pdfjs)
-routes/       Seven implemented tools and 14 placeholder handlers
+routes/       Eight implemented tools and 13 placeholder handlers
 server.js     Express, uploads, downloads and cleanup
 docs/         API reference and repository review
 uploads/      Runtime input files (ignored)

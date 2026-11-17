@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createSecurity } = require('./lib/security');
 
-const placeholders = ['compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text'];
+const placeholders = ['pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text'];
 
 function createApp(options = {}) {
     const app = express();
@@ -53,10 +53,12 @@ function createApp(options = {}) {
     app.set('upload', security.upload);
     app.set('saveOutput', security.saveOutput);
     app.set('discardOutput', security.discardOutput);
+    app.set('readOutput', security.readOutput);
     app.use('/api', security.rateLimit);
     // Return 501 before parsing or writing uploads for tools with no processing logic.
     for (const tool of placeholders) app.post(`/api/${tool}`, (req, res) => res.status(501).json({ error: 'Not implemented yet', message: `${tool} functionality coming soon` }));
     app.use('/api', security.session);
+    app.use('/api/compress', require('./routes/compress'));
     app.use('/api/rotate', require('./routes/rotate'));
     app.use('/api/reorder', require('./routes/reorder'));
     app.use('/api/split', require('./routes/split'));

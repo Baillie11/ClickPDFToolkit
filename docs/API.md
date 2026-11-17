@@ -1,5 +1,16 @@
 # ClickPDF API
 
+## Compress PDF
+
+`POST /api/compress` accepts one multipart `pdf` or a `sourceFilename` from a previous output owned by the same session (never both). `preset` is `quality`, `balanced` (default) or `smallest`. Optional `targetMB` is 0.1–50, with decimal MB (1 MB = 1,000,000 bytes); `outputFilename` is optional. Targets try progressively stronger presets, starting at the selected one. If the input already fits the target it is returned unchanged.
+
+Success includes `originalBytes`, `outputBytes`, `savedBytes`, `savedPercent`, `targetBytes`, `targetMet` (null without a target), `unchanged`, `optimisedImages`, `presetUsed`, `pageCount`, `filename` and `downloadUrl`. Output is never larger than input; a target cannot always be met. No-shrink results return the original bytes. Downloads retain the existing session ownership and expiration rules.
+
+Limits: 50 MiB input, 1,000 pages, up to 100 candidate images and 50 million candidate pixels (25 million per image); 45-second worker deadline and 384 MiB V8 heap. Native image operations also have existing backend limits. Invalid/encrypted/signed PDFs, invalid options and expired/foreign output references return 400; upload limits return 413; busy workers return 503. Disconnected requests cancel the worker.
+
+The worker re-encodes supported 8-bit DeviceRGB/DeviceGray JPEG and simple Flate image streams, and serializes object streams. It preserves original page content streams, forms and geometry; it does not rasterize entire pages or perform OCR. Masked, indexed, ICC, CMYK, predictor and other unsupported images are retained unchanged. Quality presets use JPEG quality/max-side of 85/2400, 70/1600 and 45/1000. This is not a PDF sanitizer or a guarantee of PDF/A conformance.
+
+
 ## Word to PDF (browser only)
 
 The Word to PDF interface converts DOCX locally with vendored Mammoth, DOMPurify, html-to-pdfmake and pdfmake. It makes no conversion API request and uploads no document. `/api/word-to-pdf` remains a 501 scaffold. Limits and formatting caveats are displayed before file selection. Dependencies are loaded from `vendor/word/`; workers under `js/` are terminated on reset, errors and timeout.
@@ -180,6 +191,6 @@ Invalid content, missing input, invalid pages and invalid options return 400 wit
 
 These routes perform no document processing and return 501 for otherwise accepted requests:
 
-`/api/compress`, `/api/pdf-to-word`, `/api/word-to-pdf`, `/api/pdf-to-ppt`, `/api/ppt-to-pdf`, `/api/pdf-to-excel`, `/api/excel-to-pdf`, `/api/pdf-to-image`, `/api/watermark`, `/api/html-to-pdf`, `/api/unlock`, `/api/protect`, `/api/ocr`, `/api/extract-text`.
+`/api/pdf-to-word`, `/api/word-to-pdf`, `/api/pdf-to-ppt`, `/api/ppt-to-pdf`, `/api/pdf-to-excel`, `/api/excel-to-pdf`, `/api/pdf-to-image`, `/api/watermark`, `/api/html-to-pdf`, `/api/unlock`, `/api/protect`, `/api/ocr`, `/api/extract-text`.
 
 The server returns 501 before parsing or saving uploads. Do not use these routes as converters.

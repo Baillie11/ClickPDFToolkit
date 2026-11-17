@@ -163,7 +163,7 @@ test('subpath hosting serves assets and all workflows with scoped, protected dow
     }
     assert.equal((await f.post('/ClickPDF/api/merge', {}, [], { Origin: 'https://evil.example' })).response.status, 403);
     assert.equal((await f.post('/ClickPDF/api/merge', {}, [], { 'Sec-Fetch-Site': 'cross-site' })).response.status, 403);
-    assert.equal((await f.post('/ClickPDF/api/compress')).response.status, 501);
+    assert.equal((await f.post('/ClickPDF/api/watermark')).response.status, 501);
 });
 
 test('invalid deployment prefixes fail before creating storage', () => {
@@ -240,7 +240,7 @@ test('malformed documents, fields and signatures are rejected without retained u
 test('all placeholders return 501 without persisting uploaded documents', async t => {
     const f = await fixture(t);
     const { pdf } = await inputs();
-    for (const route of ['compress', 'pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text']) {
+    for (const route of ['pdf-to-word', 'word-to-pdf', 'pdf-to-ppt', 'ppt-to-pdf', 'pdf-to-excel', 'excel-to-pdf', 'pdf-to-image', 'watermark', 'html-to-pdf', 'unlock', 'protect', 'ocr', 'extract-text']) {
         assert.equal((await f.post('/api/' + route, {}, [['pdf', pdf, 'sample.pdf', 'application/pdf']])).response.status, 501);
     }
     await f.uploadsEmpty();
@@ -282,8 +282,8 @@ test('file, aggregate, field and request-rate limits reject abusive requests and
     assert.equal((await f.post('/api/sign', { signatureData: 'x'.repeat(1024 * 1024 + 1) }, [])).response.status, 413);
     await f.uploadsEmpty();
     const limited = await fixture(t, { rateLimit: 1 });
-    assert.equal((await limited.post('/api/compress')).response.status, 501);
-    const rejected = await limited.post('/api/compress');
+    assert.equal((await limited.post('/api/watermark')).response.status, 501);
+    const rejected = await limited.post('/api/watermark');
     assert.equal(rejected.response.status, 429);
     assert.ok(Number(rejected.response.headers.get('retry-after')) > 0);
 });

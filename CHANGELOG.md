@@ -1,5 +1,13 @@
 # Change log
 
+## Compress PDF — 2026-11-17
+
+- Add image-based PDF compression with three presets, optional size targets and honest no-shrink/target-missed results.
+- Preserve page text streams, forms and geometry; reject encrypted and certificate-signed input.
+- Add size comparisons, output page previews and direct compression of session-owned results from existing tools.
+- Bound worker execution and image decoding; keep session-protected downloads and upload cleanup.
+- Add compression, preservation, target, rejection, cancellation and cross-session regression coverage.
+
 ## Unreleased
 
 - Add Rotate PDF with individual and whole-document controls, previews, reset and protected downloads.

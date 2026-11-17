@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initReorderPdf();
     initRotatePdf();
     initWordPdf();
+    initCompressPdf();
     initImageToPdf();
     initEditPdf();
     initSignPdf();
@@ -123,6 +124,7 @@ function showTool(tool) {
     document.getElementById('reorder-tool').classList.add('hidden');
     document.getElementById('rotate-tool').classList.add('hidden');
     document.getElementById('word-tool').classList.add('hidden');
+    document.getElementById('compress-tool').classList.add('hidden');
     
     // Hide tool grid, show workspace
     toolGrid.classList.add('hidden');
@@ -131,6 +133,8 @@ function showTool(tool) {
     // Show appropriate tool
     if (tool === 'merge') {
         mergeTool.classList.remove('hidden');
+    } else if (tool === 'compress') {
+        document.getElementById('compress-tool').classList.remove('hidden');
     } else if (tool === 'word-to-pdf') {
         document.getElementById('word-tool').classList.remove('hidden');
     } else if (tool === 'rotate') {
@@ -193,6 +197,7 @@ function showToolGrid() {
     resetReorderPdfForm();
     resetRotatePdfForm();
     resetWordPdfForm();
+    resetCompressPdfForm();
     resetPdfToImageForm();
 }
 

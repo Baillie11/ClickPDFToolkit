@@ -1,6 +1,6 @@
 {
   "name": "click-pdf-toolkit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Free, open-source, self-hostable PDF tools: merge PDFs, convert images, add text/image overlays and place visual signatures with a Node.js web interface.",
   "main": "server.js",
   "scripts": {

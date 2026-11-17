@@ -128,11 +128,11 @@
                         <p>Add text, images, annotations</p>
                         <span class="status available">Available</span>
                     </div>
-                    <div class="tool-card" data-tool="compress">
+                    <div class="tool-card active" data-tool="compress" role="button" tabindex="0">
                         <div class="tool-icon">📦</div>
                         <h3>Compress PDF</h3>
-                        <p>Reduce PDF file size</p>
-                        <span class="status coming-soon">Coming Soon</span>
+                        <p>Shrink PDFs for email and upload limits</p>
+                        <span class="status available">Available</span>
                     </div>
                     <div class="tool-card" data-tool="watermark">
                         <div class="tool-icon">💧</div>
@@ -245,6 +245,55 @@
                 </form>
                 <p id="word-error" class="error-message hidden" role="alert"></p>
                 <div id="word-result" class="result hidden" role="status"><h3>Your PDF is ready</h3><p id="word-result-message"></p><a id="word-download" class="download-btn" download>Download PDF</a></div>
+            </div>
+
+            <div id="compress-tool" class="tool-workspace hidden">
+                <h2>Compress PDF</h2>
+                <p>Make your PDF smaller for email or upload. Free, with no account needed.</p>
+                <p class="hint">Optimises supported photos and scans while keeping text selectable and page layout intact. Some PDFs cannot shrink further. Image quality may decrease; review the preview before sharing. Digitally signed and encrypted PDFs are not supported.</p>
+                <form id="compress-form">
+                    <fieldset id="compress-controls" class="merge-controls">
+                        <legend class="sr-only">Compression settings</legend>
+                        <div id="compress-upload-area" class="upload-area">
+                            <label for="compress-input">Drop one PDF here or choose a file</label>
+                            <input id="compress-input" type="file" accept="application/pdf,.pdf" aria-describedby="compress-limits">
+                            <p id="compress-limits" class="hint">50 MiB input · up to 1,000 pages · processed on this Click PDF server</p>
+                        </div>
+                        <p id="compress-summary" role="status">Choose a PDF to get started.</p>
+                        <div class="form-group">
+                            <label for="compress-preset">Image quality</label>
+                            <select id="compress-preset"><option value="quality">Best quality — lighter compression</option><option value="balanced" selected>Balanced — recommended</option><option value="smallest">Smallest file — lower image quality</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="compress-target">Upload limit (optional)</label>
+                            <select id="compress-target"><option value="">No target size</option><option value="2">Under 2 MB</option><option value="5">Under 5 MB</option><option value="custom">Custom limit</option></select>
+                        </div>
+                        <div id="compress-custom-group" class="form-group hidden">
+                            <label for="compress-custom">Target in MB (0.1–50)</label>
+                            <input id="compress-custom" type="number" min="0.1" max="50" step="0.1" value="1" disabled>
+                        </div>
+                        <p class="hint">With a target, we may try stronger compression to reach it. Targets are not guaranteed. 1 MB = 1,000,000 bytes.</p>
+                        <div class="form-group"><label for="compress-name">Output filename</label><input id="compress-name" type="text" maxlength="100" value="compressed-document"></div>
+                        <button id="compress-btn" class="convert-btn" type="submit" disabled>Compress PDF</button>
+                        <button id="compress-clear" class="compress-secondary" type="button">Clear</button>
+                    </fieldset>
+                </form>
+                <p id="compress-status" role="status" aria-live="polite"></p>
+                <p id="compress-error" class="error-message hidden" role="alert"></p>
+                <div id="compress-result" class="result hidden">
+                    <h3 id="compress-result-title">Your PDF is ready</h3>
+                    <p id="compress-result-message" role="status"></p>
+                    <dl class="compress-stats"><div><dt>Original</dt><dd id="compress-before"></dd></div><div><dt>Result</dt><dd id="compress-after"></dd></div><div><dt>Saved</dt><dd id="compress-saved"></dd></div></dl>
+                    <p id="compress-target-result" role="status"></p>
+                    <a id="compress-download" class="download-btn" download>Download PDF</a>
+                    <div class="compress-preview">
+                        <h3>Check your result</h3>
+                        <div class="reorder-toolbar"><button id="compress-prev" type="button" disabled>Previous page</button><span id="compress-page-label"></span><button id="compress-next" type="button" disabled>Next page</button></div>
+                        <p id="compress-preview-status" role="status"></p>
+                        <canvas id="compress-canvas" aria-label="Compressed PDF page preview"></canvas>
+                    </div>
+                    <p class="hint">Downloads are private to this browser session and expire within one hour.</p>
+                </div>
             </div>
 
             <div id="rotate-tool" class="tool-workspace hidden">
@@ -805,6 +854,7 @@
     <script src="js/reorder.js"></script>
     <script src="js/rotate.js"></script>
     <script src="js/word.js"></script>
+    <script src="js/compress.js"></script>
     <script src="js/merge.js"></script>
     <script src="js/app.js"></script>
 </body>
